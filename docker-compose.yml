@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  momentum-app:
+    build: .
+    ports:
+      - "8081:8080"  # <-- CHANGE THIS LINE
+    depends_on:
+      momentum-db:
+        condition: service_healthy
+    restart: always   # <-- ADD THIS
+    environment:
+      - MYSQL_HOST=momentum-db
+      - MYSQL_DATABASE=momentum
+      - MYSQL_USER=momentumuser
+      - MYSQL_PASSWORD=momentumpassword
+    networks:
+      - momentum-net
+
+  momentum-db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: momentum
+      MYSQL_USER: momentumuser
+      MYSQL_PASSWORD: momentumpassword
+    ports:
+      - "3306:3306"
+    networks:
+      - momentum-net
+    healthcheck: # <-- ADD THIS
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  momentum-net:
