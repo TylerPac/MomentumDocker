@@ -3,6 +3,7 @@ version: '3.8'
 services:
   momentum-app:
     build: .
+    image: momentum-app  # <-- Added for tagging and rollback
     ports:
       - "8081:8080"  # <-- CHANGE THIS LINE
     depends_on:

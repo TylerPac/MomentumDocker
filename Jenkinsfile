@@ -3,12 +3,13 @@ pipeline {
 
     environment {
         DOCKER_COMPOSE_PATH = "${WORKSPACE}/docker-compose.yml"
+        IMAGE_NAME = "momentum-app"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'master', url: 'https://github.com/TylerPac/MomentumDocker.git'
+                git branch: env.BRANCH_NAME, url: 'https://github.com/TylerPac/MomentumDocker.git'
             }
         }
 
@@ -18,14 +19,37 @@ pipeline {
             }
         }
 
+        stage('Run Tests') {
+            steps {
+                bat 'mvn test'
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 bat 'docker-compose build'
             }
         }
 
-        stage('Deploy with Docker Compose') {
+        stage('Deploy to Staging') {
+            when {
+                branch 'Development'
+            }
             steps {
+                echo 'Deploying to staging...'
+                bat 'docker-compose down'
+                bat 'docker-compose up -d --build'
+            }
+        }
+
+        stage('Deploy to Production') {
+            when {
+                branch 'main'
+            }
+            steps {
+                echo 'Deploying to production...'
+                // Save current good image as a rollback tag
+                bat 'docker tag momentum-app:latest momentum-app:rollback || echo "No image to rollback from"'
                 bat 'docker-compose down'
                 bat 'docker-compose up -d --build'
             }
@@ -34,10 +58,20 @@ pipeline {
 
     post {
         success {
-            echo 'Deployment successful!'
+            echo '✅ Build & Deployment successful!'
         }
         failure {
-            echo 'Deployment failed.'
+            echo '❌ Build or Deployment failed.'
+            script {
+                if (env.BRANCH_NAME == 'main') {
+                    echo '🔁 Rolling back production to last known good image...'
+                    bat '''
+                        docker-compose down
+                        docker tag momentum-app:rollback momentum-app:latest
+                        docker-compose up -d
+                    '''
+                }
+            }
         }
     }
 }
