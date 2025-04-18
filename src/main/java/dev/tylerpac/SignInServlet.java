@@ -13,14 +13,10 @@ import java.util.logging.*;
 @WebServlet("/signin")
 public class SignInServlet extends HttpServlet {
     private static final Logger logger = Logger.getLogger(SignInServlet.class.getName());
-
     static {
         try {
-            LogManager.getLogManager().reset(); // optional: reset default config
-            FileHandler fileHandler = new FileHandler("logs/momentum-app.log", true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            logger.addHandler(fileHandler);
-            logger.setLevel(Level.INFO);
+            LogManager.getLogManager().readConfiguration(
+                    SignInServlet.class.getClassLoader().getResourceAsStream("logging.properties"));
         } catch (IOException e) {
             e.printStackTrace();
         }
