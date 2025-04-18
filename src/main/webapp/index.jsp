@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body class="login-body">
-    <h1 class="logo-name">Momentum v2</h1>
+    <h1 class="logo-name">Momentum</h1>
     <img src="${pageContext.request.contextPath}/images/momentum_logo.png" alt="Momentum Logo" class="logo">
 
     <form action="${pageContext.request.contextPath}/signin" method="post" class="login-form">
