@@ -8,9 +8,23 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import java.io.IOException;
+import java.util.logging.*;
 
 @WebServlet("/signin")
 public class SignInServlet extends HttpServlet {
+    private static final Logger logger = Logger.getLogger(SignInServlet.class.getName());
+
+    static {
+        try {
+            LogManager.getLogManager().reset(); // optional: reset default config
+            FileHandler fileHandler = new FileHandler("logs/momentum-app.log", true);
+            fileHandler.setFormatter(new SimpleFormatter());
+            logger.addHandler(fileHandler);
+            logger.setLevel(Level.INFO);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private SessionFactory factory;
 
@@ -35,12 +49,14 @@ public class SignInServlet extends HttpServlet {
             Transaction transaction = session.beginTransaction();
 
             if ("create".equals(action)) {
+                logger.info("Attempting to create user: " + username);
                 // 🛠️ First, check if username already exists
                 Users existingUser = session.createQuery("FROM Users WHERE username = :username", Users.class)
                         .setParameter("username", username)
                         .uniqueResult();
 
                 if (existingUser != null) {
+                    logger.warning("Username already taken: " + username);
                     // Username already exists
                     request.setAttribute("errorMessage", "Username already taken. Please choose another one.");
                     request.getRequestDispatcher("/index.jsp").forward(request, response);
@@ -52,6 +68,8 @@ public class SignInServlet extends HttpServlet {
                 session.persist(newUser);
                 transaction.commit();
 
+                logger.info("✅ User created successfully: " + username);
+
                 HttpSession session1 = request.getSession();
                 session1.setAttribute("username", username);
 
@@ -59,12 +77,15 @@ public class SignInServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/dashboard");
 
             } else if ("signin".equals(action)) {
+                logger.info("User attempting sign-in: " + username);
+
                 // 🛠️ Correct way: use a QUERY to find user by username
                 Users existingUser = session.createQuery("FROM Users WHERE username = :username", Users.class)
                         .setParameter("username", username)
                         .uniqueResult();
 
                 if (existingUser != null && existingUser.isPasswordCorrect(password)) {
+                    logger.info("✅ User signed in successfully: " + username);
                     HttpSession session1 = request.getSession();
                     session1.setAttribute("username", username);
 
@@ -72,15 +93,18 @@ public class SignInServlet extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/dashboard");
 
                 } else {
+                    logger.warning("❌ Invalid login attempt for username: " + username);
                     request.setAttribute("errorMessage", "Invalid username or password.");
                     request.getRequestDispatcher("/index.jsp").forward(request, response);
                 }
 
                 transaction.commit();
             } else {
+                logger.warning("❓ Unknown action received: " + action);
                 response.getWriter().println("❓ Unknown action.");
             }
         } catch (Exception e) {
+            logger.severe("❌ Exception during processing: " + e.getMessage());
             response.getWriter().println("❌ Error occurred: " + e.getMessage());
         }
     }

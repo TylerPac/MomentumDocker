@@ -17,7 +17,8 @@ services:
       - MYSQL_PASSWORD=momentumpassword
     networks:
       - momentum-net
-
+    volumes:
+      - ./logs:/usr/local/tomcat/logs
   momentum-db:
     image: mysql:8.0
     restart: always
@@ -38,3 +39,4 @@ services:
 
 networks:
   momentum-net:
+
