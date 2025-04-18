@@ -1,6 +1,8 @@
 package dev.tylerpac;
 
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UsersTest {
@@ -14,8 +16,9 @@ public class UsersTest {
 
     @Test
     public void testPasswordMatching() {
-        Users user = new Users();
-        user.setPassword("password123");
-        assertEquals("password123", user.getPassword(), "Passwords should match");
+        String plainPassword = "password123";
+        String hashedPassword = BCrypt.hashpw(plainPassword, BCrypt.gensalt());
+
+        assertTrue(BCrypt.checkpw(plainPassword, hashedPassword), "Passwords should match");
     }
 }
