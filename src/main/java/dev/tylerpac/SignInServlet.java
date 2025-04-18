@@ -17,10 +17,18 @@ public class SignInServlet extends HttpServlet {
         try {
             LogManager.getLogManager().readConfiguration(
                     SignInServlet.class.getClassLoader().getResourceAsStream("logging.properties"));
+
+            // Explicitly add FileHandler
+            FileHandler fileHandler = new FileHandler("/usr/local/tomcat/logs/momentum-app.log", true);
+            fileHandler.setFormatter(new SimpleFormatter());
+            logger.addHandler(fileHandler);
+            logger.setUseParentHandlers(false); // optional: disables default console handler
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 
     private SessionFactory factory;
 
@@ -36,7 +44,12 @@ public class SignInServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        logger.setLevel(Level.ALL);  // optional safety
+        logger.info("💥 Logging test from SignInServlet doPost()");
 
+        for (Handler handler : logger.getHandlers()) {
+            handler.flush(); // force flush
+        }
         String action = request.getParameter("action"); // "signin" or "create"
         String username = request.getParameter("username");
         String password = request.getParameter("password");
