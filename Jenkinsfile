@@ -68,7 +68,7 @@ pipeline {
         failure {
             echo '❌ Build or Deployment failed.'
             script {
-                if (env.BRANCH_NAME == 'main') {
+                if (env.BRANCH_NAME == 'master') {
                     echo '🔁 Rolling back production to last known good image...'
                     bat '''
                         docker-compose down
