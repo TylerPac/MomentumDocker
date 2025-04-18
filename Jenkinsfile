@@ -25,7 +25,7 @@ pipeline {
             }
             post {
                 unsuccessful {
-                    error('❌ Tests failed. Aborting pipeline.')
+                    error('Tests failed. Aborting pipeline.')
                 }
             }
         }
@@ -36,7 +36,7 @@ pipeline {
             }
         }
 
-        stage('Deploy to Staging') {
+        stage('Deploy to Development Branch') {
             when {
                 branch 'Development'
             }
@@ -48,7 +48,7 @@ pipeline {
             }
         }
 
-        stage('Deploy to Production') {
+        stage('Deploy to Master Branch') {
             when {
                 branch 'master'
             }
@@ -66,10 +66,10 @@ pipeline {
             echo '✅ Build & Deployment successful!'
         }
         failure {
-            echo '❌ Build or Deployment failed.'
+            echo 'Build or Deployment failed.'
             script {
-                if (env.BRANCH_NAME == 'main') {
-                    echo '🔁 Rolling back production to last known good image...'
+                if (env.BRANCH_NAME == 'master') {
+                    echo 'Rolling back production to last known good image...'
                     bat '''
                         docker-compose down
                         docker tag momentum-app:rollback momentum-app:latest
