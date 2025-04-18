@@ -25,7 +25,7 @@ pipeline {
             }
             post {
                 unsuccessful {
-                    error('Tests failed. Aborting pipeline.')
+                    error('❌ Unit tests failed. Skipping Docker build and deployment.')
                 }
             }
         }
@@ -41,9 +41,8 @@ pipeline {
                 branch 'Development'
             }
             steps {
-                echo 'Deploying to staging...'
+                echo '🚀 Deploying to Development (staging)...'
                 bat 'docker-compose down -v --remove-orphans'
-                bat 'docker-compose build --no-cache'
                 bat 'docker-compose up -d'
             }
         }
@@ -53,30 +52,19 @@ pipeline {
                 branch 'master'
             }
             steps {
-                echo 'Deploying to production...'
-                bat 'docker tag momentum-app:latest momentum-app:rollback || echo "No image to rollback from"'
+                echo '🚀 Deploying to Production...'
                 bat 'docker-compose down -v --remove-orphans'
-                bat 'docker-compose up -d --build'
+                bat 'docker-compose up -d'
             }
         }
     }
 
     post {
         success {
-            echo '✅ Build & Deployment successful!'
+            echo '✅ Pipeline completed successfully!'
         }
         failure {
-            echo 'Build or Deployment failed.'
-            script {
-                if (env.BRANCH_NAME == 'master') {
-                    echo 'Rolling back production to last known good image...'
-                    bat '''
-                        docker-compose down
-                        docker tag momentum-app:rollback momentum-app:latest
-                        docker-compose up -d
-                    '''
-                }
-            }
+            echo '🛑 Pipeline failed — no deployment performed.'
         }
     }
 }
