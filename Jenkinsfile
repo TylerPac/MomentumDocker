@@ -23,6 +23,11 @@ pipeline {
             steps {
                 bat 'mvn test'
             }
+            post {
+                unsuccessful {
+                    error('❌ Tests failed. Aborting pipeline.')
+                }
+            }
         }
 
         stage('Build Docker Image') {
@@ -37,8 +42,9 @@ pipeline {
             }
             steps {
                 echo 'Deploying to staging...'
-                bat 'docker-compose down'
-                bat 'docker-compose up -d --build'
+                bat 'docker-compose down -v --remove-orphans'
+                bat 'docker-compose build --no-cache'
+                bat 'docker-compose up -d'
             }
         }
 
@@ -48,9 +54,8 @@ pipeline {
             }
             steps {
                 echo 'Deploying to production...'
-                // Save current good image as a rollback tag
                 bat 'docker tag momentum-app:latest momentum-app:rollback || echo "No image to rollback from"'
-                bat 'docker-compose down'
+                bat 'docker-compose down -v --remove-orphans'
                 bat 'docker-compose up -d --build'
             }
         }
