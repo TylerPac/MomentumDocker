@@ -5,7 +5,7 @@ services:
     build: .
     image: momentum-app  # <-- Added for tagging and rollback
     ports:
-      - "8081:8080"  # <-- CHANGE THIS LINE
+      - "8082:8080"  # <-- CHANGE THIS LINE
     depends_on:
       momentum-db:
         condition: service_healthy
@@ -27,7 +27,7 @@ services:
       MYSQL_USER: momentumuser
       MYSQL_PASSWORD: momentumpassword
     ports:
-      - "3306:3306"
+      - "3307:3306"
     networks:
       - momentum-net
     healthcheck: # <-- ADD THIS
