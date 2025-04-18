@@ -12,7 +12,7 @@
 
     <form action="${pageContext.request.contextPath}/signin" method="post" class="login-form">
 
-        <label /for="username" class="visually-hidden">Username</label>
+        <label for="username" class="visually-hidden">Username</label>
         <input type="text" id="username" name="username" placeholder="Username" required>
 
         <label for="password" class="visually-hidden">Password</label>
