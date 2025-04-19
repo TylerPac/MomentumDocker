@@ -12,7 +12,12 @@ pipeline {
                 git branch: env.BRANCH_NAME, url: 'https://github.com/TylerPac/MomentumDocker.git'
             }
         }
-
+        stage('Clean Logs') {
+            steps {
+                echo 'Cleaning old logs...'
+                bat 'del /q logs\\*.log* logs\\*.txt'
+            }
+        }
         stage('Build WAR') {
             steps {
                 bat 'mvn clean package'

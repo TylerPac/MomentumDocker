@@ -4,6 +4,12 @@ target/
 !**/src/test/**/target/
 
 
+logs/
+*.log
+*.lck
+*.txt
+
+
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
