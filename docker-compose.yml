@@ -18,7 +18,7 @@ services:
     networks:
       - momentum-net
     volumes:
-      - ./logs:/usr/local/tomcat/logs
+      - ./logs:/app/logs
   momentum-db:
     image: mysql:8.0
     restart: always
