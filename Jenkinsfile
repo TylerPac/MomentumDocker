@@ -48,14 +48,20 @@ pipeline {
         stage('Prepopulate Log Files') {
             steps {
                 echo '📄 Creating placeholder log files to ensure container mount does not wipe logs...'
-                bat '''
-                    echo. > logs\\momentum-app.log
-                    echo. > logs\\catalina.2025-04-19.log
-                    echo. > logs\\host-manager.2025-04-19.log
-                    echo. > logs\\localhost.2025-04-19.log
-                    echo. > logs\\localhost_access_log.2025-04-19.txt
-                    echo. > logs\\manager.2025-04-19.log
-                '''
+                script {
+                            def now = new Date().format("yyyy-MM-dd")
+                            def files = [
+                                "catalina.${now}.log",
+                                "host-manager.${now}.log",
+                                "localhost.${now}.log",
+                                "localhost_access_log.${now}.txt",
+                                "manager.${now}.log",
+                                "momentum-app.log"
+                            ]
+                            files.each { fname ->
+                                bat "echo. > logs\\${fname}"
+                            }
+                        }
             }
         }
         stage('Build Docker Image') {
