@@ -25,7 +25,8 @@ public class SignInServlet extends HttpServlet {
             logger.setUseParentHandlers(false); // optional: disables default console handler
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.severe("Exception during processing: " + e.getMessage());
+            //e.printStackTrace();
         }
     }
 
