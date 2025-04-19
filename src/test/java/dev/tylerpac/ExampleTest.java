@@ -8,6 +8,6 @@ public class ExampleTest {
 
     @Test
     public void testFailingCase() {
-        assertEquals(4, 2+2, "ForExample");
+        assertEquals(4, 1+3, "ForExample");
     }
 }
