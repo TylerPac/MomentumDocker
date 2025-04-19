@@ -13,6 +13,8 @@ COPY target/Momentum.war /usr/local/tomcat/webapps/ROOT.war
 # Copy in custom logging config
 COPY src/main/resources/logging.properties /usr/local/tomcat/conf/logging.properties
 
+COPY setenv.sh /usr/local/tomcat/bin/setenv.sh
+RUN chmod +x /usr/local/tomcat/bin/setenv.sh
 # Ensure Tomcat uses your logging config + updated log path
 ENV JAVA_OPTS="-Djava.util.logging.config.file=/usr/local/tomcat/conf/logging.properties"
 
