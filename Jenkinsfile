@@ -12,10 +12,21 @@ pipeline {
                 git branch: env.BRANCH_NAME, url: 'https://github.com/TylerPac/MomentumDocker.git'
             }
         }
+        stage('Ensure Logs Folder') {
+            steps {
+                echo 'Ensuring logs directory exists...'
+                bat 'if not exist logs mkdir logs'
+            }
+        }
         stage('Clean Logs') {
             steps {
                 echo 'Cleaning old logs...'
-                bat 'del /q logs\\*.log* logs\\*.txt'
+                bat '''
+                    if exist logs (
+                        del /q logs\\*.log*
+                        del /q logs\\*.txt
+                    )
+                '''
             }
         }
         stage('Build WAR') {
@@ -37,7 +48,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker-compose build'
+                bat 'docker-compose build --no-cache'
             }
         }
 
@@ -60,6 +71,13 @@ pipeline {
                 echo '🚀 Deploying to Production...'
                 bat 'docker-compose down -v --remove-orphans'
                 bat 'docker-compose up -d'
+            }
+        }
+
+        stage('Debug: List Logs') {
+            steps {
+                echo '🔍 Showing final log folder contents (for verification)...'
+                bat 'dir logs'
             }
         }
     }

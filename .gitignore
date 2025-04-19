@@ -4,10 +4,7 @@ target/
 !**/src/test/**/target/
 
 
-logs/
-*.log
-*.lck
-*.txt
+/logs/*
 
 
 ### IntelliJ IDEA ###
