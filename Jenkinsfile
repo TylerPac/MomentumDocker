@@ -45,7 +45,19 @@ pipeline {
                 }
             }
         }
-
+        stage('Prepopulate Log Files') {
+            steps {
+                echo '📄 Creating placeholder log files to ensure container mount does not wipe logs...'
+                bat '''
+                    echo. > logs\\momentum-app.log
+                    echo. > logs\\catalina.2025-04-19.log
+                    echo. > logs\\host-manager.2025-04-19.log
+                    echo. > logs\\localhost.2025-04-19.log
+                    echo. > logs\\localhost_access_log.2025-04-19.txt
+                    echo. > logs\\manager.2025-04-19.log
+                '''
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 bat 'docker-compose build --no-cache'
