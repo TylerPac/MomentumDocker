@@ -45,7 +45,7 @@ public class SignInServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         logger.setLevel(Level.ALL);  // optional safety
-        logger.info("💥 Logging test from SignInServlet doPost()");
+        logger.info("Logging test from SignInServlet doPost()");
 
         for (Handler handler : logger.getHandlers()) {
             handler.flush(); // force flush
@@ -77,7 +77,7 @@ public class SignInServlet extends HttpServlet {
                 session.persist(newUser);
                 transaction.commit();
 
-                logger.info("✅ User created successfully: " + username);
+                logger.info("User created successfully: " + username);
 
                 HttpSession session1 = request.getSession();
                 session1.setAttribute("username", username);
@@ -102,19 +102,19 @@ public class SignInServlet extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/dashboard");
 
                 } else {
-                    logger.warning("❌ Invalid login attempt for username: " + username);
+                    logger.severe("Invalid login attempt for username: " + username);
                     request.setAttribute("errorMessage", "Invalid username or password.");
                     request.getRequestDispatcher("/index.jsp").forward(request, response);
                 }
 
                 transaction.commit();
             } else {
-                logger.warning("❓ Unknown action received: " + action);
-                response.getWriter().println("❓ Unknown action.");
+                logger.warning("Unknown action received: " + action);
+                response.getWriter().println( "Unknown action.");
             }
         } catch (Exception e) {
-            logger.severe("❌ Exception during processing: " + e.getMessage());
-            response.getWriter().println("❌ Error occurred: " + e.getMessage());
+            logger.severe("Exception during processing: " + e.getMessage());
+            response.getWriter().println("Error occurred: " + e.getMessage());
         }
     }
 
