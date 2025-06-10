@@ -1,5 +1,6 @@
 package dev.tylerpac;
 
+import dev.tylerpac.momentum.model.Users;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
 
