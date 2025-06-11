@@ -106,16 +106,17 @@
             </resource>
         </resources>
         <plugins>
-            <!-- Spring Boot Maven Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludeDevtools>true</excludeDevtools>
-                    <mainClass>dev.tylerpac.momentum.MomentumApplication</mainClass>
-                    <classifier>exec</classifier>
-                    <skip>true</skip> <!-- 💡 Prevent repackage for WARs -->
-                </configuration>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
