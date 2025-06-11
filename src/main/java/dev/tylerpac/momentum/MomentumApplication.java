@@ -7,12 +7,12 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 
 @SpringBootApplication
 public class MomentumApplication extends SpringBootServletInitializer {
+    public static void main(String[] args) {
+        SpringApplication.run(MomentumApplication.class, args);
+    }
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
         return builder.sources(MomentumApplication.class);
     }
 
-    public static void main(String[] args) {
-        SpringApplication.run(MomentumApplication.class, args);
-    }
 }
