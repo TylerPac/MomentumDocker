@@ -104,6 +104,16 @@
                     <include>**/*.jpg</include>
                 </includes>
             </resource>
+
+            <!-- Include default application resources -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                    <include>**/*.xml</include>
+                    <include>**/*.yml</include>
+                </includes>
+            </resource>
         </resources>
         <plugins>
             <plugin>
