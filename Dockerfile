@@ -8,10 +8,9 @@ RUN rm -rf /usr/local/tomcat/webapps/*
 COPY target/MomentumDocker-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/ROOT.war
 
 
-# Fix log permissions for everyone
-RUN mkdir -p /usr/local/tomcat/logs && \
+RUN rm -rf /usr/local/tomcat/logs && \
+    mkdir -p /usr/local/tomcat/logs && \
     chmod -R 777 /usr/local/tomcat/logs
-
 
 # Expose port 8080
 EXPOSE 8080
