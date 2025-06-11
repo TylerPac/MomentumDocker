@@ -7,10 +7,11 @@ RUN rm -rf /usr/local/tomcat/webapps/*
 # Copy WAR to ROOT app
 COPY target/MomentumDocker-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/ROOT.war
 
-# Fix log file permissions for Tomcat's internal user
-# Fix logging directory ownership for tomcat user
+
+# Fix log permissions for everyone
 RUN mkdir -p /usr/local/tomcat/logs && \
-    chown -R tomcat:tomcat /usr/local/tomcat/logs
+    chmod -R 777 /usr/local/tomcat/logs
+
 
 # Expose port 8080
 EXPOSE 8080
