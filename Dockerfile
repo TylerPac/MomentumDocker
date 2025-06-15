@@ -1,7 +1,8 @@
 # Use the official Tomcat base image with JDK 17
-USER root
+
 FROM tomcat:9.0-jdk17
 
+USER root
 # Clean out default Tomcat apps
 RUN rm -rf /usr/local/tomcat/webapps/*
 
@@ -11,8 +12,9 @@ COPY ${WAR_FILE} /usr/local/tomcat/webapps/ROOT.war
 
 
 
-RUN mkdir -p /usr/local/tomcat/logs && \
-    chown -R 777 /usr/local/tomcat/logs
+# Ensure log directory exists and is writable
+RUN mkdir -p /usr/local/tomcat/logs && chmod -R 777 /usr/local/tomcat/logs
+
 
 
 # Expose port 8080
