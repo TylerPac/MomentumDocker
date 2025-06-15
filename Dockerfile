@@ -13,7 +13,11 @@ COPY ${WAR_FILE} /usr/local/tomcat/webapps/ROOT.war
 
 
 # Ensure log directory exists and is writable
-RUN mkdir -p /usr/local/tomcat/logs && chmod -R 777 /usr/local/tomcat/logs
+# Ensure the logs directory exists and is writable
+RUN mkdir -p /usr/local/tomcat/logs && \
+    chmod -R 777 /usr/local/tomcat/logs && \
+    chown -R root:root /usr/local/tomcat/logs
+
 
 
 

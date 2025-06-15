@@ -7,6 +7,9 @@ services:
     depends_on:
       momentum-db:
         condition: service_healthy
+    user: root  # Ensures the app runs as root, avoiding permissions issues
+    volumes:
+      - ./logs:/usr/local/tomcat/logs
     restart: always   # <-- ADD THIS
     environment:
       - MYSQL_HOST=momentum-db
@@ -15,8 +18,7 @@ services:
       - MYSQL_PASSWORD=momentumpassword
     networks:
       - momentum-net
-    volumes:
-      - ./logs:/usr/local/tomcat/logs
+
   momentum-db:
     image: mysql:latest
     restart: always
