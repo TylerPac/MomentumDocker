@@ -1,14 +1,15 @@
 # Use the official Tomcat base image with JDK 17
 
-FROM eclipse-temurin:17-jdk
+FROM tomcat:9.0-jdk17
 
 
 
-USER root
-# Clean out default Tomcat apps
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+# Clean default webapps
+RUN rm -rf /usr/local/tomcat/webapps/*
+
+# Copy the WAR into the ROOT context
+ARG WAR_FILE=target/*.war
+COPY ${WAR_FILE} /usr/local/tomcat/webapps/ROOT.war
 
 
 
