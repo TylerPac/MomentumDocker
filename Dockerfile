@@ -1,11 +1,7 @@
 # Use the official Tomcat base image with JDK 17
 
-FROM tomcat:9.0-jdk17
+FROM tomcat:9.0-full
 
-# Update package lists and install necessary libraries
-RUN apt-get update && apt-get install -y \
-    libapache-tomcat9-java \
-    && rm -rf /var/lib/apt/lists/*
 
 USER root
 # Clean out default Tomcat apps
