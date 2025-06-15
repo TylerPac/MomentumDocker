@@ -138,3 +138,7 @@
 15-Jun-2025 22:30:34.027 INFO [main] org.apache.catalina.startup.HostConfig.deployWAR Deployment of web application archive [/usr/local/tomcat/webapps/ROOT.war] has finished in [2,060] ms
 15-Jun-2025 22:30:34.032 INFO [main] org.apache.coyote.AbstractProtocol.start Starting ProtocolHandler ["http-nio-8080"]
 15-Jun-2025 22:30:34.043 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in [2122] milliseconds
+15-Jun-2025 22:31:56.648 INFO [Thread-1] org.apache.coyote.AbstractProtocol.pause Pausing ProtocolHandler ["http-nio-8080"]
+15-Jun-2025 22:31:56.652 INFO [Thread-1] org.apache.catalina.core.StandardService.stopInternal Stopping service [Catalina]
+15-Jun-2025 22:31:56.666 INFO [Thread-1] org.apache.coyote.AbstractProtocol.stop Stopping ProtocolHandler ["http-nio-8080"]
+15-Jun-2025 22:31:56.676 INFO [Thread-1] org.apache.coyote.AbstractProtocol.destroy Destroying ProtocolHandler ["http-nio-8080"]
