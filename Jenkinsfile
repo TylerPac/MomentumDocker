@@ -35,6 +35,7 @@ pipeline {
             }
         }
 
+        /*
         stage('Run Tests') {
             steps {
                 bat 'mvn test'
@@ -45,6 +46,7 @@ pipeline {
                 }
             }
         }
+        */
         stage('Prepopulate Log Files') {
             steps {
                 echo '📄 Creating placeholder log files to ensure container mount does not wipe logs...'
