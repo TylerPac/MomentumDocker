@@ -8,9 +8,9 @@ RUN rm -rf /usr/local/tomcat/webapps/*
 COPY target/*.war /usr/local/tomcat/webapps/ROOT.war
 
 
-RUN rm -rf /usr/local/tomcat/logs && \
-    mkdir -p /usr/local/tomcat/logs && \
-    chmod -R 777 /usr/local/tomcat/logs
+RUN mkdir -p /usr/local/tomcat/logs && \
+    chown -R 777 /usr/local/tomcat/logs
+
 
 # Expose port 8080
 EXPOSE 8080
