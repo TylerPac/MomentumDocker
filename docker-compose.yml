@@ -18,7 +18,7 @@ services:
     volumes:
       - ./logs:/usr/local/tomcat/logs
   momentum-db:
-    image: mysql:8.0
+    image: mysql:latest
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword

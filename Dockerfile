@@ -5,7 +5,7 @@ FROM tomcat:9.0-jdk17
 RUN rm -rf /usr/local/tomcat/webapps/*
 
 # Copy WAR to ROOT app
-COPY target/MomentumDocker-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/ROOT.war
+COPY target/*.war /usr/local/tomcat/webapps/ROOT.war
 
 
 RUN rm -rf /usr/local/tomcat/logs && \
