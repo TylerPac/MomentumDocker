@@ -2,6 +2,11 @@
 
 FROM tomcat:9.0-jdk17
 
+# Update package lists and install necessary libraries
+RUN apt-get update && apt-get install -y \
+    libapache-tomcat9-java \
+    && rm -rf /var/lib/apt/lists/*
+
 USER root
 # Clean out default Tomcat apps
 RUN rm -rf /usr/local/tomcat/webapps/*
