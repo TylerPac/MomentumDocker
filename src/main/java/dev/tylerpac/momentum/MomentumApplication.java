@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "dev.TylerPac")
 public class MomentumApplication extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {

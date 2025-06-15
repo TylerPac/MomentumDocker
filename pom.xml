@@ -104,5 +104,16 @@
 
 	</dependencies>
 
-
+	<build>
+		<plugins>
+			<!-- Disable Spring Boot repackage for WAR -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<skip>true</skip> <!-- This prevents Spring Boot from making a fat WAR -->
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
