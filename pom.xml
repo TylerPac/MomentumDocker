@@ -11,7 +11,7 @@
 	<groupId>dev.TylerPac</groupId>
 	<artifactId>Momentum</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>Momentum</name>
 	<description>Momentum Fitness Logger and Analytics</description>
 	<url/>
@@ -60,7 +60,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-tomcat</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -76,7 +75,6 @@
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
@@ -89,14 +87,12 @@
 			<groupId>jakarta.servlet.jsp</groupId>
 			<artifactId>jakarta.servlet.jsp-api</artifactId>
 			<version>4.0.0</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>4.0.0</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>

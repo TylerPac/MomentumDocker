@@ -1,16 +1,14 @@
 # Use the official Tomcat base image with JDK 17
 
-FROM tomcat:9.0-jdk17
+FROM eclipse-temurin:17-jdk
 
 
 
 USER root
 # Clean out default Tomcat apps
-RUN rm -rf /usr/local/tomcat/webapps/*
-
-# Copy WAR to ROOT app
-ARG WAR_FILE=target/Momentum-0.0.1-SNAPSHOT.war
-COPY ${WAR_FILE} /usr/local/tomcat/webapps/ROOT.war
+ARG JAR_FILE=target/*.jar
+COPY ${JAR_FILE} app.jar
+ENTRYPOINT ["java", "-jar", "/app.jar"]
 
 
 
