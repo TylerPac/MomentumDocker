@@ -1,4 +1,4 @@
-package dev.TylerPac.Momentum;
+package dev.tylerpac.Momentum;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,4 +1,4 @@
-package dev.TylerPac.Momentum.configuration;
+package dev.tylerpac.momentum.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
