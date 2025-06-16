@@ -8,8 +8,8 @@ FROM tomcat:9.0-jdk17
 RUN rm -rf /usr/local/tomcat/webapps/*
 
 # Copy the WAR into the ROOT context
-ARG WAR_FILE=target/*.war
-COPY ${WAR_FILE} /usr/local/tomcat/webapps/ROOT.war
+
+COPY target/Momentum-0.0.1-SNAPSHOT.war /usr/local/tomcat/webapps/ROOT.war
 
 
 
