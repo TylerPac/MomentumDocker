@@ -1,20 +1,20 @@
-<%@ page import="dev.tylerpac.Users" %>
-<%@ page import="dev.tylerpac.Workout" %>
+<%@ page import="dev.tylerpac.model.Users" %>
+<%@ page import="dev.tylerpac.model.Workout" %>
 <%@ page import="java.util.List" %>
-<%@ page import="java.lang.Float" %>
-<%@ page import="dev.tylerpac.WorkoutDetail" %>
 <%@ page import="java.sql.Date" %>
+<%@ page import="java.lang.Float" %>
+
 <%
   String username = (String) session.getAttribute("username");
-  Users user = (Users) request.getAttribute("user");
   Workout latestWorkout = (Workout) request.getAttribute("latestWorkout");
-  List<WorkoutDetail> workoutDetails = (List<WorkoutDetail>) request.getAttribute("workoutDetails");
+  List<Workout> workoutDetails = (List<Workout>) request.getAttribute("workoutDetails");
   List<Float> graph1Values = (List<Float>) request.getAttribute("graph1Values");
   List<Float> graph2Values = (List<Float>) request.getAttribute("graph2Values");
   List<java.sql.Date> sortedDates = (List<java.sql.Date>) request.getAttribute("sortedDates");
   String jsonGraph1Values = (String) request.getAttribute("jsonGraph1Values");
   String jsonGraph2Values = (String) request.getAttribute("jsonGraph2Values");
   String jsonSortedDates = (String) request.getAttribute("jsonSortedDates");
+  int totalWorkouts = (workoutDetails != null) ? workoutDetails.size() : 0;
 %>
 
 <!DOCTYPE html>
@@ -34,7 +34,6 @@
   <nav class="sidebar-nav">
     <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
     <a href="${pageContext.request.contextPath}/addWorkout">Add Workout</a>
-
     <a href="#">Progress</a>
     <a href="#">Profile</a>
     <a href="#">Settings</a>
@@ -50,19 +49,25 @@
   <div class="topbar">
     <input type="text" placeholder="Search..." class="search-box">
     <div class="profile">
-      <span class="username"><%= username %></span>  <!-- Still displaying the session username -->
+      <span class="username"><%= username %></span>
       <img src="${pageContext.request.contextPath}/images/momentum_logo.png" class="profile-pic" alt="Profile">
     </div>
   </div>
 
   <div class="dashboard-widgets">
-    <div class="widget">Previous Workout<br><strong><%= latestWorkout != null ? latestWorkout.getWorkoutType() : "None" %></strong></div>
-    <div class="widget">Current Streak<br><strong>5</strong></div>
-    <div class="widget">Total Workouts<br><strong>40,689</strong></div>
+    <div class="widget">Latest Workout<br>
+      <strong><%= latestWorkout != null ? latestWorkout.getWorkoutType() + " — " + latestWorkout.getWorkoutName() : "None" %></strong>
+    </div>
+    <div class="widget">Current Streak<br>
+      <strong>5</strong> <!-- Optional: make dynamic later -->
+    </div>
+    <div class="widget">Total Workouts<br>
+      <strong><%= totalWorkouts %></strong>
+    </div>
   </div>
 
   <div class="dashboard-chart">
-    <h2><%= latestWorkout != null ? latestWorkout.getWorkoutType() : "Workouts" %> Progress</h2>
+    <h2><%= latestWorkout != null ? latestWorkout.getWorkoutType() : "Workout" %> Progress</h2>
 
     <% if (workoutDetails != null && !workoutDetails.isEmpty()) { %>
     <canvas id="workoutChart1"></canvas>
@@ -84,11 +89,8 @@
       %>
 
       const labels = <%= jsonSortedDates %>;
-
       const graph1Data = <%= jsonGraph1Values %>;
-
       const graph2Data = <%= jsonGraph2Values %>;
-
       const graph1Label = "<%= graph1Label %>";
       const graph2Label = "<%= graph2Label %>";
 
@@ -116,10 +118,6 @@
               }
             }
           }
-        },
-        animation: {
-          duration: 1500,        // Optional: Smooth loading animation
-          easing: 'easeOutBounce'
         }
       });
 
@@ -147,10 +145,6 @@
               }
             }
           }
-        },
-        animation: {
-          duration: 1500,        // Optional: Smooth loading animation
-          easing: 'easeOutBounce'
         }
       });
     </script>

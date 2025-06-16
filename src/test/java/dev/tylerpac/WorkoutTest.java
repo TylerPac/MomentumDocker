@@ -1,5 +1,6 @@
 package dev.tylerpac;
 
+import dev.tylerpac.model.Workout;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

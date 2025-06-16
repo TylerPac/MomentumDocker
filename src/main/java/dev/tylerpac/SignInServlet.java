@@ -3,6 +3,8 @@ package dev.tylerpac;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
+
+import dev.tylerpac.model.Users;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;

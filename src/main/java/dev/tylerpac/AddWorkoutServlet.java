@@ -3,6 +3,10 @@ package dev.tylerpac;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
+
+import dev.tylerpac.model.Users;
+import dev.tylerpac.model.Workout;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -23,7 +27,6 @@ public class AddWorkoutServlet extends HttpServlet {
                 .configure("hibernate_SignIn.cfg.xml")
                 .addAnnotatedClass(Users.class)
                 .addAnnotatedClass(Workout.class)
-                .addAnnotatedClass(WorkoutDetail.class)
                 .buildSessionFactory();
     }
 
@@ -35,14 +38,13 @@ public class AddWorkoutServlet extends HttpServlet {
         String username = (httpSession != null) ? (String) httpSession.getAttribute("username") : null;
 
         if (username == null) {
-            response.sendRedirect("index.jsp");  // Not logged in
+            response.sendRedirect("index.jsp");
             return;
         }
 
         try (Session session = factory.openSession()) {
             Transaction transaction = session.beginTransaction();
 
-            // 1. Find the user
             Users user = session.createQuery("FROM Users WHERE username = :username", Users.class)
                     .setParameter("username", username)
                     .uniqueResult();
@@ -52,73 +54,45 @@ public class AddWorkoutServlet extends HttpServlet {
                 return;
             }
 
-            // 2. Grab form data
-            String workoutType = request.getParameter("workoutType");   // Cardio or Weightlifting
-            String workoutName = request.getParameter("workoutName");   // Workout name entered
+            String workoutType = request.getParameter("workoutType");
+            String workoutName = request.getParameter("workoutName");
             String workoutDateStr = request.getParameter("workoutDate");
 
-            // 3. Save Workout
-            Workout workout = new Workout();
-            workout.setUser(user);
-            workout.setWorkoutType(workoutName);  // ⭐️ Use the entered name (not just type)
-            workout.setWorkoutDate(Date.valueOf(workoutDateStr));
+            Float distance = null;
+            Float time = null;
+            Float weight = null;
+            Integer reps = null;
 
-            session.persist(workout);
-            session.flush();  // Get ID ready for WorkoutDetail
-
-            // 4. Save WorkoutDetails based on type
             if ("Cardio".equals(workoutType)) {
-                String distanceStr = request.getParameter("distance");
-                String timeStr = request.getParameter("time");
-
-                float distance = Float.parseFloat(distanceStr);
-                float time = Float.parseFloat(timeStr);
-
-                WorkoutDetail distanceDetail = new WorkoutDetail();
-                distanceDetail.setWorkout(workout);
-                distanceDetail.setMetricType("Distance");
-                distanceDetail.setMetricValue(distance);
-                distanceDetail.setMetricUnit("Miles");
-                session.persist(distanceDetail);
-
-                WorkoutDetail timeDetail = new WorkoutDetail();
-                timeDetail.setWorkout(workout);
-                timeDetail.setMetricType("Time");
-                timeDetail.setMetricValue(time);
-                timeDetail.setMetricUnit("Minutes");
-                session.persist(timeDetail);
-
+                distance = Float.parseFloat(request.getParameter("distance"));
+                time = Float.parseFloat(request.getParameter("time"));
             } else if ("Weightlifting".equals(workoutType)) {
-                String weightStr = request.getParameter("weight");
-                String repsStr = request.getParameter("reps");
-
-                float weight = Float.parseFloat(weightStr);
-                float reps = Float.parseFloat(repsStr);
-
-                WorkoutDetail weightDetail = new WorkoutDetail();
-                weightDetail.setWorkout(workout);
-                weightDetail.setMetricType("Weight");
-                weightDetail.setMetricValue(weight);
-                weightDetail.setMetricUnit("Pounds");
-                session.persist(weightDetail);
-
-                WorkoutDetail repsDetail = new WorkoutDetail();
-                repsDetail.setWorkout(workout);
-                repsDetail.setMetricType("Reps");
-                repsDetail.setMetricValue(reps);
-                repsDetail.setMetricUnit("Reps");
-                session.persist(repsDetail);
+                weight = Float.parseFloat(request.getParameter("weight"));
+                reps = Integer.parseInt(request.getParameter("reps"));
             }
 
+            Workout workout = new Workout(
+                    user,
+                    workoutType,
+                    workoutName,
+                    Date.valueOf(workoutDateStr),
+                    distance,
+                    time,
+                    weight,
+                    reps
+            );
+
+            session.persist(workout);
             transaction.commit();
 
             response.sendRedirect(request.getContextPath() + "/dashboard");
 
         } catch (Exception e) {
-            e.printStackTrace();      // ✅ Log error
-            throw new ServletException(e); // ✅ Crash cleanly if needed
+            e.printStackTrace();
+            throw new ServletException(e);
         }
     }
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -143,19 +117,18 @@ public class AddWorkoutServlet extends HttpServlet {
             }
 
             List<String> workoutNames = session.createQuery(
-                            "SELECT DISTINCT w.workoutType FROM Workout w WHERE w.user = :user", String.class)
+                            "SELECT DISTINCT w.workoutName FROM Workout w WHERE w.user = :user", String.class)
                     .setParameter("user", user)
                     .list();
 
-            request.setAttribute("workoutNames", workoutNames != null ? workoutNames : List.of()); // ⬅️ Prevent null crash
-
+            request.setAttribute("workoutNames", workoutNames != null ? workoutNames : List.of());
             request.getRequestDispatcher("/addWorkout.jsp").forward(request, response);
+
         } catch (Exception e) {
-            e.printStackTrace();      // ✅ Log error
-            throw new ServletException(e); // ✅ Crash cleanly if needed
+            e.printStackTrace();
+            throw new ServletException(e);
         }
     }
-
 
     @Override
     public void destroy() {

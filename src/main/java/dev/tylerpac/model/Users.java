@@ -1,4 +1,4 @@
-package dev.tylerpac;
+package dev.tylerpac.model;
 
 import jakarta.persistence.*;
 import org.mindrot.jbcrypt.BCrypt;

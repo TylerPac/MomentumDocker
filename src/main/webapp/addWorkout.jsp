@@ -1,4 +1,4 @@
-<%@ page import="dev.tylerpac.Users" %>
+<%@ page import="dev.tylerpac.model.Users" %>
 <%@ page import="java.util.List" %>
 <%
     String username = (String) session.getAttribute("username");
