@@ -1,6 +1,5 @@
 package dev.tylerpac;
 
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
@@ -10,7 +9,7 @@ import java.io.IOException;
 public class LogoutServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws IOException {
         // Invalidate the session
         request.getSession().invalidate();
 
