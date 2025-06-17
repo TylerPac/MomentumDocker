@@ -59,6 +59,13 @@ public class DashboardServlet extends HttpServlet {
                     .setMaxResults(1)
                     .uniqueResult();
 
+
+            Long totalWorkouts = session.createQuery(
+                            "SELECT COUNT(w) FROM Workout w WHERE w.user = :user", Long.class)
+                    .setParameter("user", user) // Bind the user parameter
+                    .uniqueResult();
+
+
             List<Workout> relevantWorkouts = new ArrayList<>();
             List<Float> graph1Values = new ArrayList<>();
             List<Float> graph2Values = new ArrayList<>();
@@ -88,6 +95,7 @@ public class DashboardServlet extends HttpServlet {
             }
 
             Gson gson = new Gson();
+            request.setAttribute("totalWorkouts", totalWorkouts);
             request.setAttribute("jsonGraph1Values", gson.toJson(graph1Values));
             request.setAttribute("jsonGraph2Values", gson.toJson(graph2Values));
             request.setAttribute("jsonSortedDates", gson.toJson(sortedDates));

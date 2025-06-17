@@ -55,9 +55,9 @@
   </div>
 
   <div class="dashboard-widgets">
-    <div class="widget">Previous Workout<br><strong><%= latestWorkout != null ? latestWorkout.getWorkoutType() : "None" %></strong></div>
-    <div class="widget">Current Streak<br><strong>5</strong></div>
-    <div class="widget">Total Workouts<br><strong>40,689</strong></div>
+    <div class="widget">Previous Workout<br><strong><%= latestWorkout != null ? latestWorkout.getWorkoutName() : "None" %></strong></div>
+    <div class="widget">Previous Type<br><strong><%= latestWorkout != null ? latestWorkout.getWorkoutType() : "None" %></strong></div>
+    <div class="widget">Total Workouts<br><strong><%= request.getAttribute("totalWorkouts") %></strong></div>
   </div>
 
   <div class="dashboard-chart">
@@ -69,7 +69,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
       <%
-        String workoutType = (latestWorkout != null) ? latestWorkout.getWorkoutType() : "";
+        String workoutType = (latestWorkout != null) ? latestWorkout.getWorkoutName() : "";
         String graph1Label = "Graph 1";
         String graph2Label = "Graph 2";
 
