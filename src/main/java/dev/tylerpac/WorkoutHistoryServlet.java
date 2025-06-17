@@ -15,7 +15,8 @@ import java.util.List;
 import java.sql.Date;
 
 @WebServlet("/workout_history")
-public class WorkoutHistoryServlet extends HttpServlet{
+public class WorkoutHistoryServlet extends HttpServlet
+{
         private SessionFactory factory;
 
         @Override
@@ -30,28 +31,36 @@ public class WorkoutHistoryServlet extends HttpServlet{
 
         @Override
         protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Session session = factory.getCurrentSession();
-        session.beginTransaction();
+            Session session = factory.openSession();
+            Transaction transaction = null;
 
-        // Get the logged-in user
-        Users user = (Users) request.getSession().getAttribute("currentUser");
+            try {
+                transaction = session.beginTransaction();
 
-        if (user != null) {
-            // Fetch the user's workouts
-            List<Workout> workouts = session.createQuery(
-                            "FROM Workout w WHERE w.user = :user ORDER BY w.workoutDate DESC", Workout.class)
-                    .setParameter("user", user)
-                    .getResultList();
+                // Get the logged-in user
+                Users user = (Users) request.getSession().getAttribute("currentUser");
 
+                if (user != null) {
+                    // Fetch the user's workouts
+                    List<Workout> workouts = session.createQuery(
+                                    "FROM Workout w WHERE w.user = :user ORDER BY w.workoutDate DESC", Workout.class)
+                            .setParameter("user", user)
+                            .getResultList();
 
-            // Pass workouts to the JSP
-            request.setAttribute("workouts", workouts);
+                    // Pass workouts to the JSP
+                    request.setAttribute("workouts", workouts);
+                }
+
+                transaction.commit();
+            } catch (Exception e) {
+                if (transaction != null) transaction.rollback();
+                e.printStackTrace();
+                throw new ServletException("Error retrieving workout history", e);
+            } finally {
+                session.close(); // Always close the session
+            }
+            request.getRequestDispatcher("/WorkoutHistory.jsp").forward(request, response);
         }
 
-        session.getTransaction().commit();
-
-        // Forward to the workout history page
-        request.getRequestDispatcher("/WorkoutHistory.jsp").forward(request, response);
-    }
 }
 
