@@ -21,8 +21,8 @@
     <nav class="sidebar-nav">
         <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
         <a href="${pageContext.request.contextPath}/addWorkout">Add Workout</a>
+        <a href="${pageContext.request.contextPath}/workout_history">Workout History</a>
 
-        <a href="#">Progress</a>
         <a href="#">Profile</a>
         <a href="#">Settings</a>
         <div class="logout-form-container">
