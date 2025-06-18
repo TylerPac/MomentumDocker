@@ -93,55 +93,26 @@ body.dashboard-body {
     padding: 10px;
     border-radius: 8px;
 }
-.logout-btn {
-    background: none;
-    border: none;
-    padding: 10px;
-    font: inherit;
-    cursor: pointer;
-    color: white;
-    width: 100%;
-    text-align: center;
-    border-radius: 8px;
-    text-decoration: none; /* <--- no underline */
-    display: block;
-}
-.edit-btn {
-    background: none;
-    border: none;
-    padding: 10px;
-    font: inherit;
-    cursor: pointer;
-    color: white;
-    width: 100%;
-    text-align: center;
-    border-radius: 8px;
-    text-decoration: none; /* <--- no underline */
-    display: block;
-}
-.delete-btn {
-    background: none;
-    border: none;
-    padding: 10px;
-    font: inherit;
-    cursor: pointer;
-    color: white;
-    width: 100%;
-    text-align: center;
-    border-radius: 8px;
-    text-decoration: none; /* <--- no underline */
-    display: block;
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
 }
 
-.logout-btn:hover {
-    background-color: #00bfa6; /* <-- same hover color as links */
-    color: white; /* <--- keep text white */
+.edit-btn, .delete-btn, .logout-btn {
+    background-color: #00bfa6;
+    border: none;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: auto; /* Don't stretch */
+    text-align: center;
 }
-.delete-btn:hover {
-    background-color: #00bfa6; /* <-- same hover color as links */
-    color: white; /* <--- keep text white */
-}
-.edit-btn:hover {
+
+.logout-btn:hover, .delete-btn:hover, .edit-btn:hover {
     background-color: #00bfa6; /* <-- same hover color as links */
     color: white; /* <--- keep text white */
 }

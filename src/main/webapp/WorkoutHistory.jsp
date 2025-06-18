@@ -54,11 +54,11 @@
         <table>
             <thead>
             <tr>
-                <th>Workout ID</th>
                 <th>Date</th>
                 <th>Workout Type</th>
                 <th>Workout Name</th>
-                <th>Details</th>
+                <th>Distance/Reps</th>
+                <th>Time/Weight</th>
                 <th>Actions</th>
             </tr>
             </thead>
@@ -68,7 +68,6 @@
                 for (Workout workout : workouts) {
             %>
             <tr>
-                <td><%= workout.getWorkoutId() %></td>
                 <td><%= workout.getWorkoutDate() %></td>
                 <td><%= workout.getWorkoutType() %></td>
                 <td><%= workout.getWorkoutName() %></td>
@@ -76,11 +75,11 @@
                     <%
                         if ("Cardio".equalsIgnoreCase(workout.getWorkoutType())) {
                     %>
-                    Distance: <%= workout.getDistance() %> m, Time: <%= workout.getTime() %> minutes
+                    Distance: <%= workout.getDistance() %>
                     <%
                     } else if ("Weightlifting".equalsIgnoreCase(workout.getWorkoutType())) {
                     %>
-                    Reps: <%= workout.getReps() %>, Weight: <%= workout.getWeight() %> lbs
+                    Reps: <%= workout.getReps() %>
                     <%
                     } else {
                     %>
@@ -90,17 +89,36 @@
                     %>
                 </td>
                 <td>
-                    <!-- Edit Button -->
-                    <form action="add-edit-workout" method="get" style="display:inline;">
-                        <input type="hidden" name="workoutId" value="<%= workout.getWorkoutId() %>">
-                        <button type="submit" class="edit-btn">Edit</button>
-                    </form>
+                    <%
+                        if ("Cardio".equalsIgnoreCase(workout.getWorkoutType())) {
+                    %>
+                    Time: <%= workout.getTime() %> minutes
+                    <%
+                    } else if ("Weightlifting".equalsIgnoreCase(workout.getWorkoutType())) {
+                    %>
+                    Weight: <%= workout.getWeight() %> lbs
+                    <%
+                    } else {
+                    %>
+                    -
+                    <%
+                        }
+                    %>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <!-- Edit Button -->
+                        <form action="add-edit-workout" method="get">
+                            <input type="hidden" name="workoutId" value="<%= workout.getWorkoutId() %>">
+                            <button type="submit" class="edit-btn">Edit</button>
+                        </form>
 
-                    <!-- Delete Button -->
-                    <form action="delete-workout" method="post" style="display:inline;">
-                        <input type="hidden" name="workoutId" value="<%= workout.getWorkoutId() %>">
-                        <button type="submit" class="delete-btn">Delete</button>
-                    </form>
+                        <!-- Delete Button -->
+                        <form action="delete-workout" method="post">
+                            <input type="hidden" name="workoutId" value="<%= workout.getWorkoutId() %>">
+                            <button type="submit" class="delete-btn">Delete</button>
+                        </form>
+                    </div>
                 </td>
             </tr>
             <%
