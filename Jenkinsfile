@@ -1,6 +1,8 @@
 pipeline {
     agent any
-
+    parameters {
+            booleanParam(name: 'RESET_DB', defaultValue: false, description: 'Wipe and reinitialize the MySQL database')
+    }
     environment {
         DOCKER_COMPOSE_PATH = "${WORKSPACE}/docker-compose.yml"
         IMAGE_NAME = "momentum-app"
@@ -35,6 +37,15 @@ pipeline {
                 bat 'docker-compose build'
             }
         }
+        stage('Reset Database') {
+        when{
+            expression { params.RESET_DB }
+        }
+            steps {
+                        echo '⚠️ Resetting MySQL volume...'
+                bat 'docker-compose down -v --remove-orphans'
+            }
+        }
 
         stage('Deploy to Development Branch') {
             when {
@@ -42,7 +53,8 @@ pipeline {
             }
             steps {
                 echo 'Deploying to staging...'
-                bat 'docker-compose down -v --remove-orphans'
+                // bat 'docker-compose down -v --remove-orphans'  removes volume
+                bat 'docker-compose down --remove-orphans'
                 bat 'docker-compose build --no-cache'
                 bat 'docker-compose up -d'
             }
@@ -55,7 +67,8 @@ pipeline {
             steps {
                 echo 'Deploying to production...'
                 bat 'docker tag momentum-app:latest momentum-app:rollback || echo "No image to rollback from"'
-                bat 'docker-compose down -v --remove-orphans'
+                // bat 'docker-compose down -v --remove-orphans'  removes volume
+                bat 'docker-compose down --remove-orphans'
                 bat 'docker-compose up -d --build'
             }
         }

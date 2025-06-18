@@ -106,12 +106,45 @@ body.dashboard-body {
     text-decoration: none; /* <--- no underline */
     display: block;
 }
+.edit-btn {
+    background: none;
+    border: none;
+    padding: 10px;
+    font: inherit;
+    cursor: pointer;
+    color: white;
+    width: 100%;
+    text-align: center;
+    border-radius: 8px;
+    text-decoration: none; /* <--- no underline */
+    display: block;
+}
+.delete-btn {
+    background: none;
+    border: none;
+    padding: 10px;
+    font: inherit;
+    cursor: pointer;
+    color: white;
+    width: 100%;
+    text-align: center;
+    border-radius: 8px;
+    text-decoration: none; /* <--- no underline */
+    display: block;
+}
 
 .logout-btn:hover {
     background-color: #00bfa6; /* <-- same hover color as links */
     color: white; /* <--- keep text white */
 }
-
+.delete-btn:hover {
+    background-color: #00bfa6; /* <-- same hover color as links */
+    color: white; /* <--- keep text white */
+}
+.edit-btn:hover {
+    background-color: #00bfa6; /* <-- same hover color as links */
+    color: white; /* <--- keep text white */
+}
 .sidebar-nav a:hover, .logout-btn:hover {
     background-color: #00bfa6;
 }

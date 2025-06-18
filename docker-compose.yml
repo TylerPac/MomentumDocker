@@ -30,6 +30,8 @@ services:
       - "3307:3306"
     networks:
       - momentum-net
+    volumes:
+      - momentum-db-data:/var/lib/mysql  # <--- THIS IS THE KEY LINE
     healthcheck: # <-- ADD THIS
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s

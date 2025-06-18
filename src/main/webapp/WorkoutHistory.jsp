@@ -93,13 +93,13 @@
                     <!-- Edit Button -->
                     <form action="add-edit-workout" method="get" style="display:inline;">
                         <input type="hidden" name="workoutId" value="<%= workout.getWorkoutId() %>">
-                        <button type="submit">Edit</button>
+                        <button type="submit" class="edit-btn">Edit</button>
                     </form>
 
                     <!-- Delete Button -->
                     <form action="delete-workout" method="post" style="display:inline;">
                         <input type="hidden" name="workoutId" value="<%= workout.getWorkoutId() %>">
-                        <button type="submit">Delete</button>
+                        <button type="submit" class="delete-btn">Delete</button>
                     </form>
                 </td>
             </tr>
