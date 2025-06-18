@@ -8,17 +8,9 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body>
-<h1>Workout History</h1>
+<body class="dashboard-body">
 
-<%
-    String username = (String) session.getAttribute("username");
-    // Retrieve the workouts list passed from the servlet
-    List<Workout> workouts = (List<Workout>) request.getAttribute("workouts");
 
-    // Check if the workouts list exists and contains data
-    if (workouts != null && !workouts.isEmpty()) {
-%>
 <div class="sidebar">
     <div class="sidebar-logo">
         <img src="${pageContext.request.contextPath}/images/momentum_logo.png" alt="Logo" class="sidebar-logo-img">
@@ -37,7 +29,12 @@
         </div>
     </nav>
 </div>
+
 <div class="main-content">
+    <%
+        String username = (String) session.getAttribute("username");
+        // Retrieve the workouts list passed from the servlet
+    %>
     <div class="topbar">
         <input type="text" placeholder="Search..." class="search-box">
         <div class="profile">
@@ -45,7 +42,15 @@
             <img src="${pageContext.request.contextPath}/images/momentum_logo.png" class="profile-pic" alt="Profile">
         </div>
     </div>
+    <%
+        List<Workout> workouts = (List<Workout>) request.getAttribute("workouts");
+
+        // Check if the workouts list exists and contains data
+        if (workouts != null && !workouts.isEmpty()) {
+    %>
+
     <div class="Workout-History-Table">
+        <h2>Workout History</h2>
         <table>
             <thead>
             <tr>

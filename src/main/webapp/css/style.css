@@ -189,6 +189,24 @@ body.dashboard-body {
     padding: 20px;
     border-radius: 12px;
 }
+table tr td, table tr th {
+    padding: 10px;
+    text-align: left;
+}
+table tr:nth-child(even) {
+    background-color: #2e3b4e;
+}
+table tr:nth-child(odd) {
+    background-color: #1f2a38;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+table tr:hover {
+    background-color: #34455a;
+}
+
 .chart-placeholder {
     height: 300px;
     background-color: #2e3b4e;
