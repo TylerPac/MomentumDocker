@@ -32,32 +32,39 @@ public class WorkoutHistoryServlet extends HttpServlet
         @Override
         protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-            Transaction transaction = null;
+            HttpSession httpSession = request.getSession(false);
+            String username = (httpSession != null) ? (String) httpSession.getAttribute("username") : null;
+
+            if (username == null) {
+                response.sendRedirect("index.jsp");
+                return;
+            }
+
             try (Session session = factory.openSession()) {
-                transaction = session.beginTransaction();
+                // Fetch the user from the database using the session's username attribute
+                Users user = session.createQuery("FROM Users WHERE username = :username", Users.class)
+                        .setParameter("username", username)
+                        .uniqueResult();
 
-                // Get the logged-in user
-                Users user = (Users) request.getSession().getAttribute("currentUser");
-
-                // Debugging: Check if the user exists
                 if (user == null) {
-                    System.out.println("No user currently logged in.");
-                    request.setAttribute("workouts", Collections.emptyList()); // Use an empty list instead of null// Set workouts explicitly as null
-                } else {
-                    // Fetch the user's workouts
-                    List<Workout> workouts = session.createQuery(
-                                    "FROM Workout w WHERE w.user = :user ORDER BY w.workoutDate DESC", Workout.class)
-                            .setParameter("user", user)
-                            .getResultList();
-
-                    System.out.println("Workouts fetched: " + workouts.size());
-                    request.setAttribute("workouts", workouts); // Pass workouts to JSP
+                    response.sendRedirect("index.jsp");
+                    return;
                 }
 
 
-                transaction.commit();
+                List<Workout> workouts = session.createQuery(
+                                "FROM Workout w WHERE w.user = :user ORDER BY w.workoutDate DESC", Workout.class)
+                        .setParameter("user", user)
+                        .getResultList();
+
+                // Set the list of workouts as a request attribute
+                request.setAttribute("workouts", workouts);
+
+
+
+
+
             } catch (Exception e) {
-                if (transaction != null) transaction.rollback();
                 e.printStackTrace();
                 throw new ServletException("Error retrieving workout history", e);
             }
