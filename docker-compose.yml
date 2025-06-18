@@ -40,3 +40,5 @@ services:
 
 networks:
   momentum-net:
+volumes:
+  momentum-db-data:
