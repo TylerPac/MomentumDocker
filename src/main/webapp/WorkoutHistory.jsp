@@ -14,7 +14,8 @@
     List<Workout> workouts = (List<Workout>) request.getAttribute("workouts");
 
     // Check if the workouts list exists and contains data
-%>if (workouts != null && !workouts.isEmpty()) {
+    if (workouts != null && !workouts.isEmpty()) {
+%>
 
 <table>
     <thead>
@@ -73,13 +74,13 @@
     %>
     </tbody>
 </table>
-
+<%
 } else {
     // Show message when no workouts are available
-
+%>
 <p>No workout history available.</p>
-
-}<%
+<%
+}
 %>
 
 </body>
