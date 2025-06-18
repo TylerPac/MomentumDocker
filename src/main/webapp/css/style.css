@@ -183,7 +183,12 @@ body.dashboard-body {
     padding: 20px;
     border-radius: 12px;
 }
-
+.Workout-History-Table {
+    background-color: #1f2a38;
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 12px;
+}
 .chart-placeholder {
     height: 300px;
     background-color: #2e3b4e;
