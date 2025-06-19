@@ -43,10 +43,11 @@
             </select>
 
             <label>Workout Date:</label>
-            <input type="date" name="workoutDate" value="<%= workout.getWorkoutDate() %>" required>
+            <input type="date" name="workoutDate" value="<%= workout.getWorkoutDate() != null ? workout.getWorkoutDate().toString() : "" %>" required>
 
             <label>Workout Name:</label>
-            <input list="workoutName" name="workoutName" value="<%= workout.getWorkoutName() %>" placeholder="Enter or pick a name" required>
+            <input type="text" name="workoutName" value="<%= workout.getWorkoutName() != null ? workout.getWorkoutName() : "" %>" placeholder="Enter or pick a name" required>
+
 
             <!-- Dynamic fields (metricsSection) -->
             <div id="metricsSection">
