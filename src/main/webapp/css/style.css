@@ -95,10 +95,10 @@ body.dashboard-body {
 }
 .action-buttons {
     display: flex;
-    /*gap: 10px;*/
-    justify-content: center;
-    align-items: center;
+    gap: 10px;
+    justify-content: left;
 }
+
 .edit-btn, .delete-btn, .logout-btn {
     background-color: #00bfa6;
     border: none;
