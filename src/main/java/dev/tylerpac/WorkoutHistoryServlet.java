@@ -28,8 +28,49 @@ public class WorkoutHistoryServlet extends HttpServlet
                     .addAnnotatedClass(Workout.class)
                     .buildSessionFactory();
         }
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Get action and workoutId from the request parameters
+        String action = request.getParameter("action");
+        String workoutIdParam = request.getParameter("workoutId");
 
-        @Override
+        if (action == null || workoutIdParam == null) {
+            response.sendRedirect("workout_history");
+            return;
+        }
+
+        int workoutId = Integer.parseInt(workoutIdParam);
+
+        try (Session session = factory.openSession()) {
+            Transaction transaction = session.beginTransaction();
+
+            // Fetch the workout by ID
+            Workout workout = session.get(Workout.class, workoutId);
+
+            if (workout != null) {
+                if ("delete".equals(action)) {
+                    // Delete the workout
+                    session.delete(workout);
+                } else if ("edit".equals(action)) {
+                    // Redirect to an edit page or modify accordingly
+                    // (Optionally store the workout in the request to pre-fill the form)
+                    request.setAttribute("workoutToEdit", workout);
+                    request.getRequestDispatcher("/editWorkout.jsp").forward(request, response);
+                    return;
+                }
+            }
+
+            transaction.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ServletException("Error processing workout action", e);
+        }
+
+        // Redirect back to workout history after handling the request
+        response.sendRedirect("workout_history");
+    }
+
+    @Override
         protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
             HttpSession httpSession = request.getSession(false);

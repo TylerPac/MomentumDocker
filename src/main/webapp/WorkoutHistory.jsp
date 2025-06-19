@@ -108,16 +108,20 @@
                 <td>
                     <div class="action-buttons">
                         <!-- Edit Button -->
-                        <form action="add-edit-workout" method="get">
+                        <form action="workout_history" method="post">
+                            <input type="hidden" name="action" value="edit">
                             <input type="hidden" name="workoutId" value="<%= workout.getWorkoutId() %>">
-                            <button type="submit" class="edit-btn">Edit</button>
+                            <button type="submit" class="btn-edit">Edit</button>
+                        </form>
+                        <!-- Delete Button -->
+                        <form action="workout_history" method="post">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="workoutId" value="<%= workout.getWorkoutId() %>">
+                            <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to delete this workout?');">
+                                Delete
+                            </button>
                         </form>
 
-                        <!-- Delete Button -->
-                        <form action="delete-workout" method="post">
-                            <input type="hidden" name="workoutId" value="<%= workout.getWorkoutId() %>">
-                            <button type="submit" class="delete-btn">Delete</button>
-                        </form>
                     </div>
                 </td>
             </tr>
