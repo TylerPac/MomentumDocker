@@ -30,61 +30,38 @@ public class EditWorkoutServlet   extends HttpServlet{
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Extract form data
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String workoutIdParam = request.getParameter("workoutId");
-        String workoutName = request.getParameter("workoutName");
-        String workoutType = request.getParameter("workoutType");
-        String workoutDateParam = request.getParameter("workoutDate");
 
-        if (workoutIdParam == null || workoutName == null || workoutType == null || workoutDateParam == null) {
-            response.sendRedirect("workout_history"); // Redirect if any parameter is missing
+        if (workoutIdParam == null) {
+            response.sendRedirect("workout_history"); // Redirect if no workout ID is provided
             return;
         }
 
-
         try {
             int workoutId = Integer.parseInt(workoutIdParam);
-            Date workoutDate = Date.valueOf(workoutDateParam); // Convert String to java.sql.Date
 
             try (Session session = factory.openSession()) {
-                Transaction transaction = session.beginTransaction();
-
-                // Fetch the workout entity to update
+                // Fetch the workout by ID
                 Workout workout = session.get(Workout.class, workoutId);
+
                 if (workout != null) {
-                    workout.setWorkoutName(workoutName);
-                    workout.setWorkoutType(workoutType);
-                    workout.setWorkoutDate(workoutDate); // Set the correctly converted Date
-
-                    // Handle optional fields based on workout type
-                    if ("Cardio".equalsIgnoreCase(workoutType)) {
-                        workout.setDistance(Float.parseFloat(request.getParameter("distance")));
-                        workout.setTime(Float.parseFloat(request.getParameter("time")));
-                    } else if ("Weightlifting".equalsIgnoreCase(workoutType)) {
-                        workout.setWeight(Float.parseFloat(request.getParameter("weight")));
-                        workout.setReps(Integer.parseInt(request.getParameter("reps")));
-                    }
-
-                    // Save changes to the database
-                    session.update(workout);
+                    // Pass the workout object to the JSP
+                    request.setAttribute("workout", workout);
+                    request.getRequestDispatcher("/editWorkout.jsp").forward(request, response);
+                } else {
+                    response.sendRedirect("workout_history"); // Redirect if the workout is not found
                 }
-                transaction.commit();
             }
-        } catch (IllegalArgumentException e) {
+        } catch (NumberFormatException e) {
             e.printStackTrace();
-            throw new ServletException("Error parsing date or numeric values", e);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ServletException("Error updating workout", e);
+            response.sendRedirect("workout_history");
         }
-        // Redirect back to the workout history page after updating
-        response.sendRedirect("workout_history");
     }
-
 
     @Override
     public void destroy() {
         factory.close();
     }
 }
+
