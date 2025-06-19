@@ -75,11 +75,11 @@
                     <%
                         if ("Cardio".equalsIgnoreCase(workout.getWorkoutType())) {
                     %>
-                    <%= workout.getDistance() %> miles
+                    miles: <%= workout.getDistance() %>
                     <%
                     } else if ("Weightlifting".equalsIgnoreCase(workout.getWorkoutType())) {
                     %>
-                    <%= workout.getReps() %> reps
+                    reps: <%= workout.getReps() %>
                     <%
                     } else {
                     %>
@@ -92,11 +92,11 @@
                     <%
                         if ("Cardio".equalsIgnoreCase(workout.getWorkoutType())) {
                     %>
-                    <%= workout.getTime() %> minutes
+                    minutes: <%= workout.getTime() %>
                     <%
                     } else if ("Weightlifting".equalsIgnoreCase(workout.getWorkoutType())) {
                     %>
-                    <%= workout.getWeight() %> lbs
+                    lbs: <%= workout.getWeight() %>
                     <%
                     } else {
                     %>
