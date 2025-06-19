@@ -95,12 +95,9 @@ body.dashboard-body {
 }
 .action-buttons {
     display: flex;
-    gap: 10px;
+    /*gap: 10px;*/
     justify-content: center;
     align-items: center;
-}
-table td {
-    vertical-align: middle;
 }
 .edit-btn, .delete-btn, .logout-btn {
     background-color: #00bfa6;
