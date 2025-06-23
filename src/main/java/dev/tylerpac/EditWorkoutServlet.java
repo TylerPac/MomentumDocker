@@ -28,6 +28,67 @@ public class EditWorkoutServlet   extends HttpServlet{
                 .addAnnotatedClass(Workout.class)
                 .buildSessionFactory();
     }
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Retrieve form data
+        String workoutIdParam = request.getParameter("workoutId"); // Hidden input field
+        String workoutType = request.getParameter("workoutType");
+        String workoutDateParam = request.getParameter("workoutDate");
+        String workoutName = request.getParameter("workoutName");
+
+        try {
+            // Parse workoutId and workoutDate
+            int workoutId = Integer.parseInt(workoutIdParam);
+            Date workoutDate = Date.valueOf(workoutDateParam); // Convert to SQL Date
+
+            // Open a Hibernate session
+            try (Session session = factory.openSession()) {
+                Transaction transaction = session.beginTransaction();
+
+                // Fetch the workout object by ID
+                Workout workout = session.get(Workout.class, workoutId);
+
+                if (workout != null) {
+                    // Update workout details
+                    workout.setWorkoutType(workoutType);
+                    workout.setWorkoutDate(workoutDate);
+                    workout.setWorkoutName(workoutName);
+
+                    // Update specific fields based on workout type
+                    if ("Cardio".equalsIgnoreCase(workoutType)) {
+                        String distanceParam = request.getParameter("distance");
+                        String timeParam = request.getParameter("time");
+
+                        workout.setDistance(Float.parseFloat(distanceParam));
+                        workout.setTime(Float.parseFloat(timeParam));
+                        workout.setWeight((float) 0); // Reset unused fields
+                        workout.setReps(0);
+                    } else if ("Weightlifting".equalsIgnoreCase(workoutType)) {
+                        String weightParam = request.getParameter("weight");
+                        String repsParam = request.getParameter("reps");
+
+                        workout.setWeight(Float.parseFloat(weightParam));
+                        workout.setReps(Integer.parseInt(repsParam));
+                        workout.setDistance((float) 0); // Reset unused fields
+                        workout.setTime((float) 0);
+                    }
+
+                    // Save updated workout to the database
+                    session.update(workout);
+                    transaction.commit();
+
+                    // Redirect to workout history or success page
+                    response.sendRedirect("workout_history");
+                } else {
+                    // If workout is not found, redirect
+                    response.sendRedirect("workout_history");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect("error.jsp"); // Redirect to an error page
+        }
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
