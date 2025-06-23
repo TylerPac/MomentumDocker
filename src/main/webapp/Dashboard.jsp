@@ -1,19 +1,12 @@
-<%@ page import="dev.tylerpac.model.Users" %>
 <%@ page import="dev.tylerpac.model.Workout" %>
 <%@ page import="java.util.List" %>
-<%@ page import="java.lang.Float" %>
-<%@ page import="java.sql.Date" %>
 <%
   String username = (String) session.getAttribute("username");
   Workout latestWorkout = (Workout) request.getAttribute("latestWorkout");
   List<Workout> workoutDetails = (List<Workout>) request.getAttribute("workoutDetails");
-  List<Float> graph1Values = (List<Float>) request.getAttribute("graph1Values");
-  List<Float> graph2Values = (List<Float>) request.getAttribute("graph2Values");
-  List<java.sql.Date> sortedDates = (List<java.sql.Date>) request.getAttribute("sortedDates");
   String jsonGraph1Values = (String) request.getAttribute("jsonGraph1Values");
   String jsonGraph2Values = (String) request.getAttribute("jsonGraph2Values");
   String jsonSortedDates = (String) request.getAttribute("jsonSortedDates");
-  int totalWorkouts = (workoutDetails != null) ? workoutDetails.size() : 0;
 %>
 
 <!DOCTYPE html>
