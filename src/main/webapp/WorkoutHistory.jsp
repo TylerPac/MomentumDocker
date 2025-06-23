@@ -35,7 +35,9 @@
         // Retrieve the workouts list passed from the servlet
     %>
     <div class="topbar">
+        <!--
         <input type="text" placeholder="Search..." class="search-box">
+        -->
         <div class="profile">
             <span class="username"><%= username %></span>  <!-- Still displaying the session username -->
             <img src="${pageContext.request.contextPath}/images/momentum_logo.png" class="profile-pic" alt="Profile">
