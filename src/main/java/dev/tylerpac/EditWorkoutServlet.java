@@ -12,8 +12,6 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import java.io.IOException;
 import java.sql.Date;
-import java.util.Collections;
-import java.util.List;
 
 @WebServlet("/editWorkout")
 public class EditWorkoutServlet   extends HttpServlet{
@@ -29,7 +27,7 @@ public class EditWorkoutServlet   extends HttpServlet{
                 .buildSessionFactory();
     }
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // Retrieve form data
         String workoutIdParam = request.getParameter("workoutId"); // Hidden input field
         String workoutType = request.getParameter("workoutType");
@@ -74,7 +72,7 @@ public class EditWorkoutServlet   extends HttpServlet{
                     }
 
                     // Save updated workout to the database
-                    session.update(workout);
+                    session.merge(workout);
                     transaction.commit();
 
                     // Redirect to workout history or success page
