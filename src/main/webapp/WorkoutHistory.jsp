@@ -108,7 +108,7 @@
                 <td>
                     <div class="action-buttons">
                         <!-- Edit Button -->
-                        <form action="workout_history" method="post">
+                        <form action="editWorkout" method="get">
                             <input type="hidden" name="action" value="edit">
                             <input type="hidden" name="workoutId" value="<%= workout.getWorkoutId() %>">
                             <button type="submit" class="btn-edit">Edit</button>

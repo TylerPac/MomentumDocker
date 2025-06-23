@@ -90,32 +90,13 @@ public class EditWorkoutServlet   extends HttpServlet{
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String workoutIdParam = request.getParameter("workoutId");
+        int workoutId = Integer.parseInt(request.getParameter("workoutId"));
+        Session session = factory.openSession();
+        Workout workout = session.get(Workout.class, workoutId);
+        request.setAttribute("workout", workout);
+        session.close();
 
-        if (workoutIdParam == null) {
-            response.sendRedirect("workout_history"); // Redirect if no workout ID is provided
-            return;
-        }
-
-        try {
-            int workoutId = Integer.parseInt(workoutIdParam);
-
-            try (Session session = factory.openSession()) {
-                // Fetch the workout by ID
-                Workout workout = session.get(Workout.class, workoutId);
-
-                if (workout != null) {
-                    // Pass the workout object to the JSP
-                    request.setAttribute("workout", workout);
-                    request.getRequestDispatcher("/editWorkout.jsp").forward(request, response);
-                } else {
-                    response.sendRedirect("workout_history"); // Redirect if the workout is not found
-                }
-            }
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-            response.sendRedirect("workout_history");
-        }
+        request.getRequestDispatcher("editWorkout.jsp").forward(request, response);
     }
 
     @Override
