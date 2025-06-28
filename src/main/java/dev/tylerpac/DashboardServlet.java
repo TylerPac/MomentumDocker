@@ -141,6 +141,68 @@ public class DashboardServlet extends HttpServlet {
             throw new ServletException(e);
         }
     }
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String workoutType = request.getParameter("workoutType");
+        String workoutName = request.getParameter("workoutName");
+
+        if (workoutType == null || workoutType.isEmpty() || workoutName == null || workoutName.isEmpty()) {
+            request.setAttribute("error", "Please select both Workout Type and Workout Name!");
+            request.getRequestDispatcher("/dashboard.jsp").forward(request, response);
+            return;
+        }
+
+        List<Workout> workoutDetails = new ArrayList<>();
+        List<String> sortedDates = new ArrayList<>();
+        List<Float> graph1Values = new ArrayList<>();
+        List<Float> graph2Values = new ArrayList<>();
+
+        try (Session session = factory.openSession()) {
+            session.beginTransaction();
+
+            // Query to fetch workouts with the selected type and name
+            Query<Workout> query = session.createQuery("FROM Workout w WHERE w.workoutType = :workoutType AND w.workoutName = :workoutName ORDER BY w.workoutDate", Workout.class);
+            query.setParameter("workoutType", workoutType);
+            query.setParameter("workoutName", workoutName);
+
+            workoutDetails = query.getResultList();
+
+            for (Workout workout : workoutDetails) {
+                sortedDates.add(workout.getWorkoutDate().toString());
+
+                // Cardio: Distance and Time
+                if ("Cardio".equals(workoutType)) {
+                    graph1Values.add(workout.getTime());
+                    graph2Values.add(workout.getDistance());
+                }
+                // Weightlifting: Weight and Reps
+                else if ("Weightlifting".equals(workoutType)) {
+                    graph1Values.add(workout.getWeight());
+                    graph2Values.add((float) workout.getReps());
+                }
+            }
+
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Convert data to JSON for use in JSP/JavaScript
+        String jsonSortedDates = new Gson().toJson(sortedDates);
+        String jsonGraph1Values = new Gson().toJson(graph1Values);
+        String jsonGraph2Values = new Gson().toJson(graph2Values);
+
+        // Set attributes to pass the data to the JSP
+        request.setAttribute("workoutType", workoutType);
+        request.setAttribute("workoutName", workoutName);
+        request.setAttribute("workoutDetails", workoutDetails);
+        request.setAttribute("jsonSortedDates", jsonSortedDates);
+        request.setAttribute("jsonGraph1Values", jsonGraph1Values);
+        request.setAttribute("jsonGraph2Values", jsonGraph2Values);
+
+        // Forward the updated data to the JSP
+        request.getRequestDispatcher("/dashboard.jsp").forward(request, response);
+    }
 
     @Override
     public void destroy() {

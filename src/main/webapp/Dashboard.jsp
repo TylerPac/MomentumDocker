@@ -114,7 +114,6 @@
         }
       </script>
     </form>
-
   </div>
 
 
@@ -124,100 +123,76 @@
 
 
   <div class="dashboard-chart">
-    <h2><%= latestWorkout != null ? latestWorkout.getWorkoutType() : "Workouts" %> Progress</h2>
+    <h2><%= request.getAttribute("workoutType") != null ? request.getAttribute("workoutType") + " - Progress" : "Workouts Progress" %></h2>
 
     <% if (workoutDetails != null && !workoutDetails.isEmpty()) { %>
     <canvas id="workoutChart1"></canvas>
     <canvas id="workoutChart2"></canvas>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-      <%
-        String workoutType = (latestWorkout != null) ? latestWorkout.getWorkoutName() : "";
-        String graph1Label = "Graph 1";
-        String graph2Label = "Graph 2";
-
-        if ("Cardio".equals(workoutType)) {
-            graph1Label = "Average Pace (min/mile)";
-            graph2Label = "Distance (miles)";
-        } else if ("Weightlifting".equals(workoutType)) {
-            graph1Label = "Weight (lbs)";
-            graph2Label = "Reps";
-        }
-      %>
-
+      // Coordinates and Labels
       const labels = <%= jsonSortedDates %>;
-
       const graph1Data = <%= jsonGraph1Values %>;
-
       const graph2Data = <%= jsonGraph2Values %>;
 
-      const graph1Label = "<%= graph1Label %>";
-      const graph2Label = "<%= graph2Label %>";
+      // Set dynamic graph labels for Cardio/Weightlifting
+      let graph1Label = "";
+      let graph2Label = "";
 
+      <% if ("Cardio".equals(request.getAttribute("workoutType"))) { %>
+      graph1Label = "Time (minutes)";
+      graph2Label = "Distance (miles)";
+      <% } else if ("Weightlifting".equals(request.getAttribute("workoutType"))) { %>
+      graph1Label = "Weight (lbs)";
+      graph2Label = "Reps";
+      <% } %>
+
+      // Graph 1
       const ctx1 = document.getElementById('workoutChart1').getContext('2d');
       new Chart(ctx1, {
         type: 'line',
         data: {
-          labels: labels,
+          labels: labels, // Dates
           datasets: [{
             label: graph1Label,
             data: graph1Data,
-            borderColor: 'rgba(75, 192, 192, 1)',
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1,
             borderWidth: 2,
             fill: false
           }]
         },
         options: {
           responsive: true,
-          scales: {
-            y: {
-              beginAtZero: false,
-              ticks: {
-                autoSkip: true,
-                maxTicksLimit: 10
-              }
-            }
-          }
-        },
-        animation: {
-          duration: 1500,        // Optional: Smooth loading animation
-          easing: 'easeOutBounce'
+          plugins: { legend: { display: true } },
+          scales: { y: { beginAtZero: true } }
         }
       });
 
+      // Graph 2
       const ctx2 = document.getElementById('workoutChart2').getContext('2d');
       new Chart(ctx2, {
         type: 'line',
         data: {
-          labels: labels,
+          labels: labels, // Dates
           datasets: [{
             label: graph2Label,
             data: graph2Data,
             borderColor: 'rgba(153, 102, 255, 1)',
+            tension: 0.1,
             borderWidth: 2,
             fill: false
           }]
         },
         options: {
           responsive: true,
-          scales: {
-            y: {
-              beginAtZero: false,
-              ticks: {
-                autoSkip: true,
-                maxTicksLimit: 10
-              }
-            }
-          }
-        },
-        animation: {
-          duration: 1500,        // Optional: Smooth loading animation
-          easing: 'easeOutBounce'
+          plugins: { legend: { display: true } },
+          scales: { y: { beginAtZero: true } }
         }
       });
     </script>
     <% } else { %>
-    <p>No workout data to display yet.</p>
+    <p>No data available for the selected workout.</p>
     <% } %>
   </div>
 </div>
