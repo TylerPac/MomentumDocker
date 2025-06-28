@@ -55,7 +55,7 @@ public class DashboardServlet extends HttpServlet {
             }
 
             /*
-            Up to here i validate seesion and user is logged in
+            Up to here i validate session and user is logged in
 
 
              */
@@ -201,7 +201,7 @@ public class DashboardServlet extends HttpServlet {
         request.setAttribute("jsonGraph2Values", jsonGraph2Values);
 
         // Forward the updated data to the JSP
-        request.getRequestDispatcher("/dashboard.jsp").forward(request, response);
+        request.getRequestDispatcher("/Dashboard.jsp").forward(request, response);
     }
 
     @Override
