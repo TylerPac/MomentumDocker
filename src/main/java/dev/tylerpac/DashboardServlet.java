@@ -148,7 +148,7 @@ public class DashboardServlet extends HttpServlet {
 
         if (workoutType == null || workoutType.isEmpty() || workoutName == null || workoutName.isEmpty()) {
             request.setAttribute("error", "Please select both Workout Type and Workout Name!");
-            request.getRequestDispatcher("/dashboard.jsp").forward(request, response);
+            request.getRequestDispatcher("/Dashboard.jsp").forward(request, response);
             return;
         }
 
