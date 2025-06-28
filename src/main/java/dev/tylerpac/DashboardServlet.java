@@ -42,7 +42,7 @@ public class DashboardServlet extends HttpServlet {
             response.sendRedirect("index.jsp");
             return;
         }
-        Map<String, List<String>> workoutMap = new HashMap<>();
+
 
         try (Session session = factory.openSession()) {
             Users user = session.createQuery("FROM Users WHERE username = :username", Users.class)
@@ -59,20 +59,9 @@ public class DashboardServlet extends HttpServlet {
 
 
              */
+            Map<String, List<String>> workoutMap = getWorkoutMap(session);
+            request.setAttribute("workoutMap", workoutMap);
 
-
-            Query<Object[]> Dquery = session.createQuery(
-                    "SELECT w.workoutType, w.workoutName FROM Workout w GROUP BY w.workoutType, w.workoutName",
-                    Object[].class
-            );
-            List<Object[]> results = Dquery.getResultList();
-
-            for (Object[] row : results) {
-                String workoutType = (String) row[0];
-                String workoutName = (String) row[1];
-
-                workoutMap.computeIfAbsent(workoutType, k -> new ArrayList<>()).add(workoutName);
-            }
 
 
 
@@ -124,7 +113,6 @@ public class DashboardServlet extends HttpServlet {
             request.setAttribute("jsonGraph1Values", gson.toJson(graph1Values));
             request.setAttribute("jsonGraph2Values", gson.toJson(graph2Values));
             request.setAttribute("jsonSortedDates", gson.toJson(sortedDates));
-            request.setAttribute("workoutMap", workoutMap);
             request.setAttribute("latestWorkout", latestWorkout);
             request.setAttribute("workoutDetails", relevantWorkouts); // now List<Workout>
             /*
@@ -159,6 +147,9 @@ public class DashboardServlet extends HttpServlet {
 
         try (Session session = factory.openSession()) {
             session.beginTransaction();
+
+            Map<String, List<String>> workoutMap = getWorkoutMap(session);
+            request.setAttribute("workoutMap", workoutMap);
 
             // Query to fetch workouts with the selected type and name
             Query<Workout> query = session.createQuery("FROM Workout w WHERE w.workoutType = :workoutType AND w.workoutName = :workoutName ORDER BY w.workoutDate", Workout.class);
@@ -208,5 +199,19 @@ public class DashboardServlet extends HttpServlet {
     public void destroy() {
         factory.close();
         super.destroy();
+    }
+
+    private Map<String, List<String>> getWorkoutMap(Session session) {
+        Map<String, List<String>> workoutMap = new HashMap<>();
+        Query<Object[]> query = session.createQuery(
+                "SELECT w.workoutType, w.workoutName FROM Workout w GROUP BY w.workoutType, w.workoutName",
+                Object[].class
+        );
+        for (Object[] row : query.getResultList()) {
+            String workoutType = (String) row[0];
+            String workoutName = (String) row[1];
+            workoutMap.computeIfAbsent(workoutType, k -> new ArrayList<>()).add(workoutName);
+        }
+        return workoutMap;
     }
 }
