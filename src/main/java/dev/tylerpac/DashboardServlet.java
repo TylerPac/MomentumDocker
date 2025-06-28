@@ -42,6 +42,7 @@ public class DashboardServlet extends HttpServlet {
             response.sendRedirect("index.jsp");
             return;
         }
+        Map<String, List<String>> workoutMap = new HashMap<>();
 
         try (Session session = factory.openSession()) {
             Users user = session.createQuery("FROM Users WHERE username = :username", Users.class)
@@ -52,6 +53,30 @@ public class DashboardServlet extends HttpServlet {
                 response.sendRedirect("index.jsp");
                 return;
             }
+
+            /*
+            Up to here i validate seesion and user is logged in
+
+
+             */
+
+
+            Query<Object[]> Dquery = session.createQuery(
+                    "SELECT w.workoutType, w.workoutName FROM Workout w GROUP BY w.workoutType, w.workoutName",
+                    Object[].class
+            );
+            List<Object[]> results = Dquery.getResultList();
+
+            for (Object[] row : results) {
+                String workoutType = (String) row[0];
+                String workoutName = (String) row[1];
+
+                workoutMap.computeIfAbsent(workoutType, k -> new ArrayList<>()).add(workoutName);
+            }
+
+
+
+
 
             Workout latestWorkout = session.createQuery(
                             "FROM Workout w WHERE w.user = :user ORDER BY w.workoutDate DESC", Workout.class)
@@ -99,12 +124,15 @@ public class DashboardServlet extends HttpServlet {
             request.setAttribute("jsonGraph1Values", gson.toJson(graph1Values));
             request.setAttribute("jsonGraph2Values", gson.toJson(graph2Values));
             request.setAttribute("jsonSortedDates", gson.toJson(sortedDates));
-
+            request.setAttribute("workoutMap", workoutMap);
             request.setAttribute("latestWorkout", latestWorkout);
             request.setAttribute("workoutDetails", relevantWorkouts); // now List<Workout>
+            /*
+            // Dont think i use this anymore
             request.setAttribute("graph1Values", graph1Values);
             request.setAttribute("graph2Values", graph2Values);
             request.setAttribute("sortedDates", sortedDates);
+            */
 
             request.getRequestDispatcher("/Dashboard.jsp").forward(request, response);
 

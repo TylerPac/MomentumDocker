@@ -1,5 +1,8 @@
 <%@ page import="dev.tylerpac.model.Workout" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="com.google.gson.Gson" %>
+
 <%
   String username = (String) session.getAttribute("username");
   Workout latestWorkout = (Workout) request.getAttribute("latestWorkout");
@@ -53,6 +56,72 @@
     <div class="widget">Previous Type<br><strong><%= latestWorkout != null ? latestWorkout.getWorkoutType() : "None" %></strong></div>
     <div class="widget">Total Workouts<br><strong><%= request.getAttribute("totalWorkouts") %></strong></div>
   </div>
+
+
+
+  <div class="form-container">
+    <h2>Update Graphs</h2>
+    <form action="dashboard" method="post" id="updateWorkoutForm">
+      <label for="workoutType">Workout Type:</label>
+      <select id="workoutType" name="workoutType" onchange="updateWorkoutNames()" required>
+        <option value="">Select Workout Type</option>
+        <option value="Cardio" <%= "Cardio".equals(request.getParameter("workoutType")) ? "selected" : "" %>>Cardio</option>
+        <option value="Weightlifting" <%= "Weightlifting".equals(request.getParameter("workoutType")) ? "selected" : "" %>>Weightlifting</option>
+      </select>
+
+      <label for="workoutName">Workout Name:</label>
+      <select id="workoutName" name="workoutName" required>
+        <option value="">Select Workout Name</option>
+      </select>
+
+      <button type="submit" class="btn-create">Update</button>
+
+      <script>
+        // Preloaded workout data from the server (retrieved dynamically in JSP)
+        const workoutData = {
+          <%
+            // Fetch the data for all workout types from the database
+            Map<String, List<String>> workoutMap = (Map<String, List<String>>) request.getAttribute("workoutMap");
+            for (Map.Entry<String, List<String>> entry : workoutMap.entrySet()) {
+              String workoutType = entry.getKey();
+              List<String> workoutNames = entry.getValue();
+
+              // Render JavaScript-compatible JSON
+          %>
+          "<%= workoutType %>": <%= new Gson().toJson(workoutNames) %>,
+          <% } %>
+        };
+
+        function updateWorkoutNames() {
+          const workoutTypeSelect = document.getElementById('workoutType');
+          const workoutNameSelect = document.getElementById('workoutName');
+
+          // Get the selected workout type
+          const selectedWorkoutType = workoutTypeSelect.value;
+
+          // Clear existing options in the workoutName dropdown
+          workoutNameSelect.innerHTML = '<option value="">Select Workout Name</option>';
+
+          // Populate the dropdown with workout names corresponding to the selected type
+          if (selectedWorkoutType && workoutData[selectedWorkoutType]) {
+            workoutData[selectedWorkoutType].forEach(name => {
+              const option = document.createElement('option');
+              option.value = name;
+              option.textContent = name;
+              workoutNameSelect.appendChild(option);
+            });
+          }
+        }
+      </script>
+    </form>
+
+  </div>
+
+
+
+
+
+
 
   <div class="dashboard-chart">
     <h2><%= latestWorkout != null ? latestWorkout.getWorkoutType() : "Workouts" %> Progress</h2>
