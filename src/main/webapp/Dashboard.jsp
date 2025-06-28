@@ -106,7 +106,7 @@
           if (selectedWorkoutType && workoutData[selectedWorkoutType]) {
             workoutData[selectedWorkoutType].forEach(name => {
               const option = document.createElement('option');
-              option.value = name;f
+              option.value = name;
               option.textContent = name;
               workoutNameSelect.appendChild(option);
             });
