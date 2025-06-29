@@ -98,8 +98,8 @@ public class DashboardServlet extends HttpServlet {
                                 "  AND w.workoutName = :name " +
                                 "ORDER BY w.workoutDate ASC", Workout.class);
                 query.setParameter("user", user);
-                query.setParameter("workoutType", workoutType);
-                query.setParameter("workoutName", workoutName);
+                query.setParameter("type", workoutType);
+                query.setParameter("name", workoutName);
 
                 relevantWorkouts = query.list();
 
