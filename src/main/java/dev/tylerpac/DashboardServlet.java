@@ -166,6 +166,9 @@ public class DashboardServlet extends HttpServlet {
         List<Float>         graph1Values = new ArrayList<>();
         List<Float>         graph2Values = new ArrayList<>();
 
+        Workout latestWorkout = null;
+        Long totalWorkouts = 0L;
+
         try (Session session = factory.openSession()) {
             session.beginTransaction();
 
@@ -194,6 +197,17 @@ public class DashboardServlet extends HttpServlet {
             q.setParameter("name",  workoutName);
 
             workoutDetails = q.getResultList();
+
+            if (!workoutDetails.isEmpty()) {
+                latestWorkout = workoutDetails.get(workoutDetails.size() - 1);
+            }
+
+            totalWorkouts = session.createQuery(
+                            "SELECT COUNT(w) FROM Workout w WHERE w.user = :user", Long.class)
+                    .setParameter("user", user)
+                    .uniqueResult();
+
+
             session.getTransaction().commit();
         } catch (Exception e) {
             e.printStackTrace();
@@ -218,6 +232,8 @@ public class DashboardServlet extends HttpServlet {
 
         // ── 5.  Pass everything to the JSP ────────────────────────────────────────
         Gson gson = new Gson();
+        request.setAttribute("latestWorkout", latestWorkout);
+        request.setAttribute("totalWorkouts", totalWorkouts);
         request.setAttribute("workoutType", workoutType);
         request.setAttribute("workoutName", workoutName);
         request.setAttribute("workoutDetails", workoutDetails);
