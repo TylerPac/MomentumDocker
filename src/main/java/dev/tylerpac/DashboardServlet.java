@@ -84,13 +84,22 @@ public class DashboardServlet extends HttpServlet {
             List<Float> graph1Values = new ArrayList<>();
             List<Float> graph2Values = new ArrayList<>();
             List<java.sql.Date> sortedDates = new ArrayList<>();
+            String workoutType = null;
+            String workoutName = null;
 
             if (latestWorkout != null) {
-                String workoutType = latestWorkout.getWorkoutType();
+                workoutType = latestWorkout.getWorkoutType();
+                workoutName = latestWorkout.getWorkoutName();
 
-                Query<Workout> query = session.createQuery("FROM Workout w WHERE w.user = :user AND w.workoutType = :type ORDER BY w.workoutDate ASC", Workout.class);
+                Query<Workout> query = session.createQuery(
+                        "FROM Workout w " +
+                                "WHERE w.user = :user " +
+                                "  AND w.workoutType = :type " +
+                                "  AND w.workoutName = :name " +
+                                "ORDER BY w.workoutDate ASC", Workout.class);
                 query.setParameter("user", user);
-                query.setParameter("type", workoutType);
+                query.setParameter("workoutType", workoutType);
+                query.setParameter("workoutName", workoutName);
 
                 relevantWorkouts = query.list();
 
@@ -109,6 +118,8 @@ public class DashboardServlet extends HttpServlet {
             }
 
             Gson gson = new Gson();
+            request.setAttribute("workoutType", workoutType);
+            request.setAttribute("workoutName", workoutName);
             request.setAttribute("totalWorkouts", totalWorkouts);
             request.setAttribute("jsonGraph1Values", gson.toJson(graph1Values));
             request.setAttribute("jsonGraph2Values", gson.toJson(graph2Values));
@@ -131,67 +142,89 @@ public class DashboardServlet extends HttpServlet {
     }
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // ── 1.  Validate form fields ───────────────────────────────────────────────
         String workoutType = request.getParameter("workoutType");
         String workoutName = request.getParameter("workoutName");
 
-        if (workoutType == null || workoutType.isEmpty() || workoutName == null || workoutName.isEmpty()) {
+        if (workoutType == null || workoutType.isEmpty()
+                || workoutName == null || workoutName.isEmpty()) {
             request.setAttribute("error", "Please select both Workout Type and Workout Name!");
             request.getRequestDispatcher("/Dashboard.jsp").forward(request, response);
             return;
         }
 
+        // ── 2.  Get the logged-in user from the session ────────────────────────────
+        HttpSession httpSession = request.getSession(false);
+        String username = (httpSession != null) ? (String) httpSession.getAttribute("username") : null;
+        if (username == null) {                      // session expired?
+            response.sendRedirect("index.jsp");
+            return;
+        }
+
         List<Workout> workoutDetails = new ArrayList<>();
-        List<String> sortedDates = new ArrayList<>();
-        List<Float> graph1Values = new ArrayList<>();
-        List<Float> graph2Values = new ArrayList<>();
+        List<String>        sortedDates  = new ArrayList<>();
+        List<Float>         graph1Values = new ArrayList<>();
+        List<Float>         graph2Values = new ArrayList<>();
 
         try (Session session = factory.openSession()) {
             session.beginTransaction();
 
-            Map<String, List<String>> workoutMap = getWorkoutMap(session);
-            request.setAttribute("workoutMap", workoutMap);
-
-            // Query to fetch workouts with the selected type and name
-            Query<Workout> query = session.createQuery("FROM Workout w WHERE w.workoutType = :workoutType AND w.workoutName = :workoutName ORDER BY w.workoutDate", Workout.class);
-            query.setParameter("workoutType", workoutType);
-            query.setParameter("workoutName", workoutName);
-
-            workoutDetails = query.getResultList();
-
-            for (Workout workout : workoutDetails) {
-                sortedDates.add(workout.getWorkoutDate().toString());
-
-                // Cardio: Distance and Time
-                if ("Cardio".equals(workoutType)) {
-                    graph1Values.add(workout.getTime());
-                    graph2Values.add(workout.getDistance());
-                }
-                // Weightlifting: Weight and Reps
-                else if ("Weightlifting".equals(workoutType)) {
-                    graph1Values.add(workout.getWeight());
-                    graph2Values.add((float) workout.getReps());
-                }
+            // 2a. pull Users entity once
+            Users user = session.createQuery(
+                            "FROM Users WHERE username = :username", Users.class)
+                    .setParameter("username", username)
+                    .uniqueResult();
+            if (user == null) {                       // should not happen
+                response.sendRedirect("index.jsp");
+                return;
             }
 
+            // 2b. keep workout-type/name map for the dropdown (unchanged)
+            request.setAttribute("workoutMap", getWorkoutMap(session));
+
+            // ── 3.  Fetch only THIS user's workouts ───────────────────────────────
+            Query<Workout> q = session.createQuery(
+                    "FROM Workout w " +
+                            "WHERE w.user = :user " +
+                            "  AND w.workoutType = :type " +
+                            "  AND w.workoutName = :name " +
+                            "ORDER BY w.workoutDate ASC", Workout.class);
+            q.setParameter("user",  user);
+            q.setParameter("type",  workoutType);
+            q.setParameter("name",  workoutName);
+
+            workoutDetails = q.getResultList();
             session.getTransaction().commit();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // Convert data to JSON for use in JSP/JavaScript
-        String jsonSortedDates = new Gson().toJson(sortedDates);
-        String jsonGraph1Values = new Gson().toJson(graph1Values);
-        String jsonGraph2Values = new Gson().toJson(graph2Values);
+        // ── 4.  Build graph data (pace + distance for Cardio) ─────────────────────
+        for (Workout w : workoutDetails) {
+            sortedDates.add(w.getWorkoutDate().toString());
 
-        // Set attributes to pass the data to the JSP
+            if ("Cardio".equals(workoutType)
+                    && w.getDistance() != null && w.getDistance() > 0
+                    && w.getTime() != null) {
+                float pace = w.getTime() / w.getDistance();   // min per mile/km
+                graph1Values.add(pace);                       // Graph-1: pace
+                graph2Values.add(w.getDistance());            // Graph-2: distance
+            } else if ("Weightlifting".equals(workoutType)
+                    && w.getWeight() != null && w.getReps() != null) {
+                graph1Values.add(w.getWeight());              // Graph-1: weight
+                graph2Values.add(w.getReps().floatValue());   // Graph-2: reps
+            }
+        }
+
+        // ── 5.  Pass everything to the JSP ────────────────────────────────────────
+        Gson gson = new Gson();
         request.setAttribute("workoutType", workoutType);
         request.setAttribute("workoutName", workoutName);
         request.setAttribute("workoutDetails", workoutDetails);
-        request.setAttribute("jsonSortedDates", jsonSortedDates);
-        request.setAttribute("jsonGraph1Values", jsonGraph1Values);
-        request.setAttribute("jsonGraph2Values", jsonGraph2Values);
+        request.setAttribute("jsonSortedDates",  gson.toJson(sortedDates));
+        request.setAttribute("jsonGraph1Values", gson.toJson(graph1Values));
+        request.setAttribute("jsonGraph2Values", gson.toJson(graph2Values));
 
-        // Forward the updated data to the JSP
         request.getRequestDispatcher("/Dashboard.jsp").forward(request, response);
     }
 
