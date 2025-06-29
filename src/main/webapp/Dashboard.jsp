@@ -52,8 +52,8 @@
   </div>
 
   <div class="dashboard-widgets">
-    <div class="widget">Previous Workout<br><strong><%= latestWorkout != null ? latestWorkout.getWorkoutName() : "None" %></strong></div>
-    <div class="widget">Previous Type<br><strong><%= latestWorkout != null ? latestWorkout.getWorkoutType() : "None" %></strong></div>
+    <div class="widget">Workout Name<br><strong><%= latestWorkout != null ? latestWorkout.getWorkoutName() : "None" %></strong></div>
+    <div class="widget">Workout Type<br><strong><%= latestWorkout != null ? latestWorkout.getWorkoutType() : "None" %></strong></div>
     <div class="widget">Total Workouts<br><strong><%= request.getAttribute("totalWorkouts") %></strong></div>
   </div>
 
