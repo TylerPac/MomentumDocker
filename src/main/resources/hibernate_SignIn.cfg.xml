@@ -6,7 +6,6 @@
         <!-- MySQL Database Connection URL -->
         <property name="hibernate.connection.url">jdbc:mysql://momentum-db:3306/momentum</property>
 
-
         <property name="hibernate.connection.username">momentumuser</property>
         <property name="hibernate.connection.password">momentumpassword</property>
 
