@@ -1,0 +1,243 @@
+body.login-body {
+    background: linear-gradient(#0f1b2b, #142236); /* Smooth dark blue gradient */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Nunito Sans', sans-serif;
+
+}
+
+.logo {
+    width: 500px;
+    margin-bottom: 30px;
+}
+.logo-name{
+    justify-content: center;
+    font-family: 'Nunito Sans', sans-serif;
+    color: white;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 25px;
+    background-color: #2e3b4e;
+    color: white;
+    font-size: 16px;
+    text-align: center;
+}
+
+.login-form input::placeholder {
+    color: #ccc;
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    align-items: center;
+}
+
+.btn-login, .btn-create {
+    background-color: #00bfa6; /* Teal */
+    border: none;
+    color: white;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 80%;
+    justify-content: center;
+}
+
+.btn-login:hover, .btn-create:hover {
+    background-color: #009688;
+}
+body.dashboard-body {
+    display: flex;
+    margin: 0;
+    font-family: 'Nunito Sans', sans-serif;
+    background-color: #0f1b2b;
+    height: 100vh;
+    color: white;
+}
+
+/* Sidebar */
+.sidebar {
+    background-color: #1f2a38;
+    width: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+}
+
+.sidebar-logo-img {
+    width: 60px;
+    margin-bottom: 30px;
+}
+
+.sidebar-nav a{
+    color: white;
+    text-decoration: none;
+    margin: 10px 0;
+    display: block;
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+}
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: left;
+}
+
+.edit-btn, .delete-btn, .logout-btn {
+    background-color: #00bfa6;
+    border: none;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: auto; /* Don't stretch */
+    text-align: center;
+}
+
+.logout-btn:hover, .delete-btn:hover, .edit-btn:hover {
+    background-color: #00bfa6; /* <-- same hover color as links */
+    color: white; /* <--- keep text white */
+}
+.sidebar-nav a:hover, .logout-btn:hover {
+    background-color: #00bfa6;
+}
+.logout-form-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 20px;
+    background-color: #142236;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Topbar */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.search-box {
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: none;
+    width: 200px;
+    background-color: #2e3b4e;
+    color: white;
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+}
+
+.username {
+    margin-right: 10px;
+}
+
+.profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+/* Dashboard Widgets */
+.dashboard-widgets {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.widget {
+    background-color: #1f2a38;
+    padding: 20px;
+    border-radius: 12px;
+    width: 30%;
+    text-align: center;
+}
+
+/* Dashboard Chart */
+.dashboard-chart {
+    background-color: #1f2a38;
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 12px;
+}
+.Workout-History-Table {
+    background-color: #1f2a38;
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 12px;
+}
+table tr td, table tr th {
+    padding: 10px;
+    text-align: left;
+}
+table tr:nth-child(even) {
+    background-color: #2e3b4e;
+}
+table tr:nth-child(odd) {
+    background-color: #1f2a38;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+table tr:hover {
+    background-color: #34455a;
+}
+
+.chart-placeholder {
+    height: 300px;
+    background-color: #2e3b4e;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+.error-message {
+    color: red;
+    margin-top: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+.workout-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.workout-form input,
+.workout-form select,
+.workout-form button {
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+label.visually-hidden {
+    position: absolute;
+    left: -9999px;
+}

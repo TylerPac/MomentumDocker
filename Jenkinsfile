@@ -1,10 +1,13 @@
 pipeline {
     agent any
-
+    
     tools {
         maven 'Maven 3.9'
     }
-
+    
+    parameters {
+            booleanParam(name: 'RESET_DB', defaultValue: false, description: 'Wipe and reinitialize the MySQL database')
+    }
     environment {
         DOCKER_COMPOSE_PATH = "${WORKSPACE}/docker-compose.yml"
         IMAGE_NAME = "momentum-app"
@@ -16,63 +19,36 @@ pipeline {
                 git branch: env.BRANCH_NAME, url: 'https://github.com/TylerPac/MomentumDocker.git'
             }
         }
-        stage('Ensure Logs Folder') {
-            steps {
-                echo 'Ensuring logs directory exists...'
-                sh 'mkdir -p logs'
-            }
-        }
-        stage('Clean Logs') {
-            steps {
-                echo 'Cleaning old logs...'
-                sh '''
-                    if [ -d "logs" ]; then
-                        rm -f logs/*.log*
-                        rm -f logs/*.txt
-                    fi
-                '''
-            }
-        }
+
         stage('Build WAR') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                sh 'mvn clean package'
             }
         }
 
-        /*
         stage('Run Tests') {
             steps {
-                bat 'mvn test'
+                sh 'mvn test'
             }
             post {
                 unsuccessful {
-                    error('❌ Unit tests failed. Skipping Docker build and deployment.')
+                    error('Tests failed. Aborting pipeline.')
                 }
             }
         }
-        */
-        stage('Prepopulate Log Files') {
-            steps {
-                echo '📄 Creating placeholder log files to ensure container mount does not wipe logs...'
-                script {
-                            def now = new Date().format("yyyy-MM-dd")
-                            def files = [
-                                "catalina.${now}.log",
-                                "host-manager.${now}.log",
-                                "localhost.${now}.log",
-                                "localhost_access_log.${now}.txt",
-                                "manager.${now}.log",
-                                "momentum-app.log"
-                            ]
-                            files.each { fname ->
-                                sh "touch logs/${fname}"
-                            }
-                        }
-            }
-        }
+
         stage('Build Docker Image') {
             steps {
-                sh 'docker compose build --no-cache'
+                sh 'docker compose build'
+            }
+        }
+        stage('Reset Database') {
+        when{
+            expression { params.RESET_DB }
+        }
+            steps {
+                        echo '⚠️ Resetting MySQL volume...'
+                sh 'docker compose down -v --remove-orphans'
             }
         }
 
@@ -81,9 +57,13 @@ pipeline {
                 branch 'Development'
             }
             steps {
-                echo '🚀 Deploying to Development (staging)...'
-                sh 'docker compose down || true'
-                sh 'docker compose up -d --build'
+                echo 'Deploying to staging...'
+                // Stop any existing momentum container first
+                sh 'docker stop momentum || true'
+                sh 'docker rm momentum || true'
+                sh 'docker compose down --remove-orphans || true'
+                sh 'docker compose build --no-cache'
+                sh 'docker compose up -d'
             }
         }
 
@@ -92,26 +72,33 @@ pipeline {
                 branch 'master'
             }
             steps {
-                echo '🚀 Deploying to Production...'
-                sh 'docker compose down || true'
+                echo 'Deploying to production...'
+                sh 'docker tag momentum-app:latest momentum-app:rollback || echo "No image to rollback from"'
+                // Stop any existing momentum container first
+                sh 'docker stop momentum || true'
+                sh 'docker rm momentum || true'
+                sh 'docker compose down --remove-orphans || true'
                 sh 'docker compose up -d --build'
-            }
-        }
-
-        stage('Debug: List Logs') {
-            steps {
-                echo '🔍 Showing final log folder contents (for verification)...'
-                sh 'ls -la logs/'
             }
         }
     }
 
     post {
         success {
-            echo '✅ Pipeline completed successfully!'
+            echo '✅ Build & Deployment successful!'
         }
         failure {
-            echo '🛑 Pipeline failed — no deployment performed.'
+            echo 'Build or Deployment failed.'
+            script {
+                if (env.BRANCH_NAME == 'master') {
+                    echo 'Rolling back production to last known good image...'
+                    sh '''
+                        docker compose down
+                        docker tag momentum-app:rollback momentum-app:latest
+                        docker compose up -d
+                    '''
+                }
+            }
         }
     }
 }
