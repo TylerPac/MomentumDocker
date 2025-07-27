@@ -2,6 +2,7 @@ services:
   momentum-app:
     build: .
     image: momentum-app  # <-- Added for tagging and rollback
+    container_name: momentum  # <-- Clean container name
     ports:
       - "8082:8080"  # <-- Changed to 8082 to avoid conflict with TylerPacDevelopment backend
     #user: root  # Ensures the app runs as root, avoiding permissions issues
@@ -13,5 +14,4 @@ services:
       - MYSQL_DATABASE=SirPacsterHomeLabDatabase
       - MYSQL_USER=sirpacster
       - MYSQL_PASSWORD=Kora4386!
-    network_mode: "host"
 
