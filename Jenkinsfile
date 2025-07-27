@@ -61,14 +61,14 @@ pipeline {
                                 "momentum-app.log"
                             ]
                             files.each { fname ->
-                                bat "echo. > logs\\${fname}"
+                                sh "touch logs/${fname}"
                             }
                         }
             }
         }
         stage('Build Docker Image') {
             steps {
-                bat 'docker-compose build --no-cache'
+                sh 'docker-compose build --no-cache'
             }
         }
 
@@ -78,8 +78,8 @@ pipeline {
             }
             steps {
                 echo '🚀 Deploying to Development (staging)...'
-                bat 'docker-compose down -v --remove-orphans'
-                bat 'docker-compose up -d'
+                sh 'docker-compose down -v --remove-orphans'
+                sh 'docker-compose up -d'
             }
         }
 
@@ -89,15 +89,15 @@ pipeline {
             }
             steps {
                 echo '🚀 Deploying to Production...'
-                bat 'docker-compose down -v --remove-orphans'
-                bat 'docker-compose up -d'
+                sh 'docker-compose down -v --remove-orphans'
+                sh 'docker-compose up -d'
             }
         }
 
         stage('Debug: List Logs') {
             steps {
                 echo '🔍 Showing final log folder contents (for verification)...'
-                bat 'dir logs'
+                sh 'ls -la logs/'
             }
         }
     }
