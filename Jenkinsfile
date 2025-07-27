@@ -58,8 +58,10 @@ pipeline {
             }
             steps {
                 echo 'Deploying to staging...'
-                // sh 'docker compose down -v --remove-orphans'  removes volume
-                sh 'docker compose down --remove-orphans'
+                // Stop any existing momentum container first
+                sh 'docker stop momentum || true'
+                sh 'docker rm momentum || true'
+                sh 'docker compose down --remove-orphans || true'
                 sh 'docker compose build --no-cache'
                 sh 'docker compose up -d'
             }
@@ -72,8 +74,10 @@ pipeline {
             steps {
                 echo 'Deploying to production...'
                 sh 'docker tag momentum-app:latest momentum-app:rollback || echo "No image to rollback from"'
-                // sh 'docker compose down -v --remove-orphans'  removes volume
-                sh 'docker compose down --remove-orphans'
+                // Stop any existing momentum container first
+                sh 'docker stop momentum || true'
+                sh 'docker rm momentum || true'
+                sh 'docker compose down --remove-orphans || true'
                 sh 'docker compose up -d --build'
             }
         }
