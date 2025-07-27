@@ -1,5 +1,10 @@
 pipeline {
     agent any
+    
+    tools {
+        maven 'Maven 3.9'
+    }
+    
     parameters {
             booleanParam(name: 'RESET_DB', defaultValue: false, description: 'Wipe and reinitialize the MySQL database')
     }
@@ -17,13 +22,13 @@ pipeline {
 
         stage('Build WAR') {
             steps {
-                bat 'mvn clean package'
+                sh 'mvn clean package'
             }
         }
 
         stage('Run Tests') {
             steps {
-                bat 'mvn test'
+                sh 'mvn test'
             }
             post {
                 unsuccessful {
@@ -34,7 +39,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker-compose build'
+                sh 'docker-compose build'
             }
         }
         stage('Reset Database') {
@@ -43,7 +48,7 @@ pipeline {
         }
             steps {
                         echo '⚠️ Resetting MySQL volume...'
-                bat 'docker-compose down -v --remove-orphans'
+                sh 'docker-compose down -v --remove-orphans'
             }
         }
 
@@ -53,10 +58,10 @@ pipeline {
             }
             steps {
                 echo 'Deploying to staging...'
-                // bat 'docker-compose down -v --remove-orphans'  removes volume
-                bat 'docker-compose down --remove-orphans'
-                bat 'docker-compose build --no-cache'
-                bat 'docker-compose up -d'
+                // sh 'docker-compose down -v --remove-orphans'  removes volume
+                sh 'docker-compose down --remove-orphans'
+                sh 'docker-compose build --no-cache'
+                sh 'docker-compose up -d'
             }
         }
 
@@ -66,10 +71,10 @@ pipeline {
             }
             steps {
                 echo 'Deploying to production...'
-                bat 'docker tag momentum-app:latest momentum-app:rollback || echo "No image to rollback from"'
-                // bat 'docker-compose down -v --remove-orphans'  removes volume
-                bat 'docker-compose down --remove-orphans'
-                bat 'docker-compose up -d --build'
+                sh 'docker tag momentum-app:latest momentum-app:rollback || echo "No image to rollback from"'
+                // sh 'docker-compose down -v --remove-orphans'  removes volume
+                sh 'docker-compose down --remove-orphans'
+                sh 'docker-compose up -d --build'
             }
         }
     }
@@ -83,7 +88,7 @@ pipeline {
             script {
                 if (env.BRANCH_NAME == 'master') {
                     echo 'Rolling back production to last known good image...'
-                    bat '''
+                    sh '''
                         docker-compose down
                         docker tag momentum-app:rollback momentum-app:latest
                         docker-compose up -d
