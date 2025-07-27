@@ -15,23 +15,23 @@ pipeline {
         stage('Ensure Logs Folder') {
             steps {
                 echo 'Ensuring logs directory exists...'
-                bat 'if not exist logs mkdir logs'
+                sh 'mkdir -p logs'
             }
         }
         stage('Clean Logs') {
             steps {
                 echo 'Cleaning old logs...'
-                bat '''
-                    if exist logs (
-                        del /q logs\\*.log*
-                        del /q logs\\*.txt
-                    )
+                sh '''
+                    if [ -d "logs" ]; then
+                        rm -f logs/*.log*
+                        rm -f logs/*.txt
+                    fi
                 '''
             }
         }
         stage('Build WAR') {
             steps {
-                bat 'mvn clean package'
+                sh 'mvn clean package'
             }
         }
 

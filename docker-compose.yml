@@ -3,40 +3,20 @@ services:
     build: .
     image: momentum-app  # <-- Added for tagging and rollback
     ports:
-      - "8081:8080"  # <-- CHANGE THIS LINE
-    depends_on:
-      momentum-db:
-        condition: service_healthy
+      - "8082:8080"  # <-- Changed to 8082 to avoid conflict with TylerPacDevelopment backend
     #user: root  # Ensures the app runs as root, avoiding permissions issues
     #volumes:
     #  - ./logs:/usr/local/tomcat/logs
     restart: always   # <-- ADD THIS
     environment:
-      - MYSQL_HOST=momentum-db
-      - MYSQL_DATABASE=momentum
-      - MYSQL_USER=momentumuser
-      - MYSQL_PASSWORD=momentumpassword
+      - MYSQL_HOST=shared_mysql
+      - MYSQL_DATABASE=SirPacsterHomeLabDatabase
+      - MYSQL_USER=sirpacster
+      - MYSQL_PASSWORD=Kora4386!
     networks:
-      - momentum-net
-
-  momentum-db:
-    image: mysql:latest
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: momentum
-      MYSQL_USER: momentumuser
-      MYSQL_PASSWORD: momentumpassword
-    ports:
-      - "3308:3306"
-    networks:
-      - momentum-net
-    healthcheck: # <-- ADD THIS
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - tylerpacdev_backend
 
 networks:
-  momentum-net:
+  tylerpacdev_backend:
+    external: true
 
