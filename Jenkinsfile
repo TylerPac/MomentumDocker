@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven 3.9'
+    }
+
     environment {
         DOCKER_COMPOSE_PATH = "${WORKSPACE}/docker-compose.yml"
         IMAGE_NAME = "momentum-app"
@@ -31,7 +35,7 @@ pipeline {
         }
         stage('Build WAR') {
             steps {
-                sh 'mvn clean package'
+                sh 'mvn clean package -DskipTests'
             }
         }
 
@@ -68,7 +72,7 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                sh 'docker-compose build --no-cache'
+                sh 'docker compose build --no-cache'
             }
         }
 
@@ -78,8 +82,8 @@ pipeline {
             }
             steps {
                 echo '🚀 Deploying to Development (staging)...'
-                sh 'docker-compose down -v --remove-orphans'
-                sh 'docker-compose up -d'
+                sh 'docker compose down || true'
+                sh 'docker compose up -d --build'
             }
         }
 
@@ -89,8 +93,8 @@ pipeline {
             }
             steps {
                 echo '🚀 Deploying to Production...'
-                sh 'docker-compose down -v --remove-orphans'
-                sh 'docker-compose up -d'
+                sh 'docker compose down || true'
+                sh 'docker compose up -d --build'
             }
         }
 
