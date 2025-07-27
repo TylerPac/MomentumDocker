@@ -9,14 +9,9 @@ services:
     #  - ./logs:/usr/local/tomcat/logs
     restart: always   # <-- ADD THIS
     environment:
-      - MYSQL_HOST=shared_mysql
+      - MYSQL_HOST=192.168.1.124
       - MYSQL_DATABASE=SirPacsterHomeLabDatabase
       - MYSQL_USER=sirpacster
       - MYSQL_PASSWORD=Kora4386!
-    networks:
-      - tylerpacdev_backend
-
-networks:
-  tylerpacdev_backend:
-    external: true
+    network_mode: "host"
 
