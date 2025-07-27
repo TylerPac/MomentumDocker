@@ -39,7 +39,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker-compose build'
+                sh 'docker compose build'
             }
         }
         stage('Reset Database') {
@@ -48,7 +48,7 @@ pipeline {
         }
             steps {
                         echo '⚠️ Resetting MySQL volume...'
-                sh 'docker-compose down -v --remove-orphans'
+                sh 'docker compose down -v --remove-orphans'
             }
         }
 
@@ -58,10 +58,10 @@ pipeline {
             }
             steps {
                 echo 'Deploying to staging...'
-                // sh 'docker-compose down -v --remove-orphans'  removes volume
-                sh 'docker-compose down --remove-orphans'
-                sh 'docker-compose build --no-cache'
-                sh 'docker-compose up -d'
+                // sh 'docker compose down -v --remove-orphans'  removes volume
+                sh 'docker compose down --remove-orphans'
+                sh 'docker compose build --no-cache'
+                sh 'docker compose up -d'
             }
         }
 
@@ -72,9 +72,9 @@ pipeline {
             steps {
                 echo 'Deploying to production...'
                 sh 'docker tag momentum-app:latest momentum-app:rollback || echo "No image to rollback from"'
-                // sh 'docker-compose down -v --remove-orphans'  removes volume
-                sh 'docker-compose down --remove-orphans'
-                sh 'docker-compose up -d --build'
+                // sh 'docker compose down -v --remove-orphans'  removes volume
+                sh 'docker compose down --remove-orphans'
+                sh 'docker compose up -d --build'
             }
         }
     }
@@ -89,9 +89,9 @@ pipeline {
                 if (env.BRANCH_NAME == 'master') {
                     echo 'Rolling back production to last known good image...'
                     sh '''
-                        docker-compose down
+                        docker compose down
                         docker tag momentum-app:rollback momentum-app:latest
-                        docker-compose up -d
+                        docker compose up -d
                     '''
                 }
             }
