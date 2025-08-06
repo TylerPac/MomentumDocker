@@ -54,6 +54,15 @@ This project showcases:
 ## Live Demo
 - [https://momentum.tylerpac.dev/](https://momentum.tylerpac.dev/)
 
+Test Login and Password
+Login
+```bash
+   admin
+```
+Password
+```bash
+   admin
+```
 ---
 
 *Created by Tyler Pac. For more projects, visit my portfolio!*
