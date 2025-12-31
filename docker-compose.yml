@@ -10,10 +10,10 @@ services:
         condition: service_healthy
     restart: always
     environment:
-      - MYSQL_HOST=momentum-db
-      - MYSQL_DATABASE=momentum
-      - MYSQL_USER=momentumuser
-      - MYSQL_PASSWORD=momentumpassword
+      - MYSQL_HOST=${MYSQL_HOST:-momentum-db}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-momentum}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     networks:
       - momentum-net
 
@@ -22,10 +22,10 @@ services:
     container_name: momentum-db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: momentum
-      MYSQL_USER: momentumuser
-      MYSQL_PASSWORD: momentumpassword
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-momentum}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3307:3306"  # Different port to avoid conflict with TylerPacDevelopment
     networks:

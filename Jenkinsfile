@@ -11,6 +11,15 @@ pipeline {
     environment {
         DOCKER_COMPOSE_PATH = "${WORKSPACE}/docker-compose.yml"
         IMAGE_NAME = "momentum-app"
+
+        // Used for docker compose env substitution + Spring datasource resolution
+        MYSQL_HOST = "momentum-db"
+
+        // Jenkins Credentials IDs
+        MYSQL_ROOT_PASSWORD = credentials('MYSQL_ROOT_PASSWORD')
+        MYSQL_DATABASE = credentials('MYSQL_DATABASE')
+        MYSQL_USER = credentials('MYSQL_USER')
+        MYSQL_PASSWORD = credentials('MYSQL_PASSWORD')
     }
 
     stages {
