@@ -70,7 +70,7 @@ export default function Dashboard() {
 
   return (
     <div className="main-content">
-      <h2>Dashboard</h2>
+      <h2 className="page-title page-title--dashboard">Dashboard</h2>
       {error ? <div className="error-message">{error}</div> : null}
 
       <div className="dashboard-controls">

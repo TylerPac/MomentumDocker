@@ -460,6 +460,10 @@ body.dashboard-body label {
   border-radius: var(--radius-md);
 }
 
+.sidebar-nav a.is-active {
+  background-color: var(--color-accent);
+}
+
 .action-buttons {
   display: flex;
   gap: 10px;
@@ -895,5 +899,16 @@ label.visually-hidden {
   .dashboard-summary {
     grid-column: 1 / -1;
     margin-left: 0;
+  }
+}
+
+@media (min-width: 821px) {
+  .page-title--dashboard {
+    display: none;
+  }
+
+  .mobile-menu__nav a.is-active {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
   }
 }

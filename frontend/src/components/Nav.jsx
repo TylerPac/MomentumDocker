@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { clearAccessToken } from '../api';
 import { useAuth } from '../auth';
 
@@ -60,10 +60,10 @@ export default function Nav() {
       </div>
 
       <div className="sidebar-nav">
-        <Link to="/dashboard">Dashboard</Link>
-        <Link to="/workouts/new">Add Workout</Link>
-        <Link to="/history">Workout History</Link>
-        <Link to="/settings">Settings</Link>
+        <NavLink to="/dashboard" className={({ isActive }) => (isActive ? 'is-active' : undefined)}>Dashboard</NavLink>
+        <NavLink to="/workouts/new" className={({ isActive }) => (isActive ? 'is-active' : undefined)}>Add Workout</NavLink>
+        <NavLink to="/history" className={({ isActive }) => (isActive ? 'is-active' : undefined)}>Workout History</NavLink>
+        <NavLink to="/settings" className={({ isActive }) => (isActive ? 'is-active' : undefined)}>Settings</NavLink>
       </div>
 
       <div className="logout-form-container">
@@ -74,10 +74,10 @@ export default function Nav() {
         <div className="mobile-menu__content" role="dialog" aria-label="Menu">
           <div className="mobile-menu__spacer" />
           <div className="mobile-menu__nav" aria-label="Mobile navigation">
-            <Link to="/dashboard" onClick={closeMobileMenu}>Dashboard</Link>
-            <Link to="/workouts/new" onClick={closeMobileMenu}>Add Workout</Link>
-            <Link to="/history" onClick={closeMobileMenu}>Workout History</Link>
-            <Link to="/settings" onClick={closeMobileMenu}>Settings</Link>
+            <NavLink to="/dashboard" className={({ isActive }) => (isActive ? 'is-active' : undefined)} onClick={closeMobileMenu}>Dashboard</NavLink>
+            <NavLink to="/workouts/new" className={({ isActive }) => (isActive ? 'is-active' : undefined)} onClick={closeMobileMenu}>Add Workout</NavLink>
+            <NavLink to="/history" className={({ isActive }) => (isActive ? 'is-active' : undefined)} onClick={closeMobileMenu}>Workout History</NavLink>
+            <NavLink to="/settings" className={({ isActive }) => (isActive ? 'is-active' : undefined)} onClick={closeMobileMenu}>Settings</NavLink>
           </div>
           <div className="mobile-menu__footer">
             <button type="button" className="logout-btn" onClick={onLogout}>Logout</button>
