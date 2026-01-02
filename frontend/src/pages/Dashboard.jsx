@@ -1,6 +1,7 @@
 import React from 'react';
 import { apiFetch } from '../api';
 import LineChart from '../components/LineChart';
+import { formatMinutesAsClock } from '../utils/duration';
 
 function flattenWorkoutMap(workoutMap) {
   const entries = Object.entries(workoutMap || {});
@@ -131,7 +132,7 @@ export default function Dashboard() {
                 <td>{w.workoutType}</td>
                 <td>{w.workoutName}</td>
                 <td>{w.distance ?? ''}</td>
-                <td>{w.time ?? ''}</td>
+                <td>{w.workoutType === 'Cardio' ? formatMinutesAsClock(w.time) : (w.time ?? '')}</td>
                 <td>{w.weight ?? ''}</td>
                 <td>{w.reps ?? ''}</td>
               </tr>

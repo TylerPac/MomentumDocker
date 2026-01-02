@@ -70,15 +70,33 @@ export default function LineChart({ title, labels, values, yLabel, yAxisLabel, y
     if (!svgRef.current) return;
 
     function updateScale() {
-      const rect = svgRef.current?.getBoundingClientRect();
+      const svg = svgRef.current;
+      if (!svg) return;
+
+      // Prefer CTM because it reflects actual viewBox->screen scale,
+      // even when CSS/layout causes non-uniform stretching.
+      const ctm = typeof svg.getScreenCTM === 'function' ? svg.getScreenCTM() : null;
+      const sx = clampNumber(ctm?.a, NaN);
+      const sy = clampNumber(ctm?.d, NaN);
+      if (Number.isFinite(sx) && sx > 0 && Number.isFinite(sy) && sy > 0) {
+        setSvgScale({ sx, sy });
+        return;
+      }
+
+      // Fallback for environments where getScreenCTM is unavailable.
+      const rect = svg.getBoundingClientRect();
       if (!rect || rect.width <= 0 || rect.height <= 0) return;
       setSvgScale({ sx: rect.width / width, sy: rect.height / height });
     }
 
     updateScale();
-    const ro = new ResizeObserver(updateScale);
-    ro.observe(svgRef.current);
-    return () => ro.disconnect();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateScale) : null;
+    ro?.observe(svgRef.current);
+    window.addEventListener('resize', updateScale);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener('resize', updateScale);
+    };
   }, [width, height]);
 
   const yScale = React.useMemo(() => {

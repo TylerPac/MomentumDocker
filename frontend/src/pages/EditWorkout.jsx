@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../api';
+import { formatMinutesAsClock, isClockInputMaybeValid, parseClockToMinutes } from '../utils/duration';
 
 export default function EditWorkout() {
   const { id } = useParams();
@@ -22,11 +23,12 @@ export default function EditWorkout() {
     setLoading(true);
     apiFetch(`/workouts/${id}`)
       .then((w) => {
-        setWorkoutType(w.workoutType || 'Cardio');
+        const type = w.workoutType || 'Cardio';
+        setWorkoutType(type);
         setWorkoutName(w.workoutName || '');
         setWorkoutDate(w.workoutDate || '');
         setDistance(w.distance ?? '');
-        setTime(w.time ?? '');
+        setTime(type === 'Cardio' ? formatMinutesAsClock(w.time) : (w.time ?? ''));
         setWeight(w.weight ?? '');
         setReps(w.reps ?? '');
       })
@@ -39,12 +41,17 @@ export default function EditWorkout() {
     setError('');
 
     try {
+      let parsedTime = null;
+      if (workoutType === 'Cardio' && time.trim() !== '') {
+        parsedTime = parseClockToMinutes(time);
+      }
+
       const payload = {
         workoutType,
         workoutName,
         workoutDate,
         distance: workoutType === 'Cardio' && distance !== '' ? Number(distance) : null,
-        time: workoutType === 'Cardio' && time !== '' ? Number(time) : null,
+        time: workoutType === 'Cardio' ? parsedTime : null,
         weight: workoutType === 'Weightlifting' && weight !== '' ? Number(weight) : null,
         reps: workoutType === 'Weightlifting' && reps !== '' ? Number(reps) : null,
       };
@@ -93,7 +100,17 @@ export default function EditWorkout() {
             </label>
             <label>
               Time
-              <input value={time} onChange={(e) => setTime(e.target.value)} inputMode="decimal" />
+              <input
+                value={time}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  if (!isClockInputMaybeValid(next)) return;
+                  setTime(next);
+                }}
+                placeholder="m:ss"
+                inputMode="numeric"
+                autoComplete="off"
+              />
             </label>
           </>
         ) : (

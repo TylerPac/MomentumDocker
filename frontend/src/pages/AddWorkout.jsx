@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api';
+import { isClockInputMaybeValid, parseClockToMinutes } from '../utils/duration';
 
 export default function AddWorkout() {
   const navigate = useNavigate();
@@ -28,12 +29,17 @@ export default function AddWorkout() {
     setError('');
 
     try {
+      let parsedTime = null;
+      if (workoutType === 'Cardio' && time.trim() !== '') {
+        parsedTime = parseClockToMinutes(time);
+      }
+
       const payload = {
         workoutType,
         workoutName,
         workoutDate,
         distance: workoutType === 'Cardio' && distance !== '' ? Number(distance) : null,
-        time: workoutType === 'Cardio' && time !== '' ? Number(time) : null,
+        time: workoutType === 'Cardio' ? parsedTime : null,
         weight: workoutType === 'Weightlifting' && weight !== '' ? Number(weight) : null,
         reps: workoutType === 'Weightlifting' && reps !== '' ? Number(reps) : null,
       };
@@ -85,7 +91,17 @@ export default function AddWorkout() {
             </label>
             <label>
               Time
-              <input value={time} onChange={(e) => setTime(e.target.value)} inputMode="decimal" />
+              <input
+                value={time}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  if (!isClockInputMaybeValid(next)) return;
+                  setTime(next);
+                }}
+                placeholder="m:ss"
+                inputMode="numeric"
+                autoComplete="off"
+              />
             </label>
           </>
         ) : (

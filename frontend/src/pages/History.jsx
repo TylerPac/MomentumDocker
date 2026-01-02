@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../api';
+import { formatMinutesAsClock } from '../utils/duration';
 
 export default function History() {
   const [items, setItems] = React.useState([]);
@@ -53,7 +54,7 @@ export default function History() {
                 <td>{w.workoutType}</td>
                 <td>{w.workoutName}</td>
                 <td>{w.distance ?? ''}</td>
-                <td>{w.time ?? ''}</td>
+                <td>{w.workoutType === 'Cardio' ? formatMinutesAsClock(w.time) : (w.time ?? '')}</td>
                 <td>{w.weight ?? ''}</td>
                 <td>{w.reps ?? ''}</td>
                 <td>

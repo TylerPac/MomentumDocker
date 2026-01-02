@@ -37,7 +37,8 @@ pipeline {
                         }
                     }
 
-                    sh 'docker compose pull || true'
+                    // Only mysql is pulled from a registry; backend/frontend are built from source.
+                    sh 'docker compose pull mysql || true'
                     sh 'docker compose build --pull'
                     sh 'docker compose up -d'
                 }
