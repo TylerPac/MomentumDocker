@@ -25,7 +25,8 @@ pipeline {
                         string(credentialsId: 'MYSQL_ROOT_PASSWORD', variable: 'MYSQL_ROOT_PASSWORD'),
                         string(credentialsId: 'MYSQL_DATABASE', variable: 'MYSQL_DATABASE'),
                         string(credentialsId: 'MYSQL_USER', variable: 'MYSQL_USER'),
-                        string(credentialsId: 'MYSQL_PASSWORD', variable: 'MYSQL_PASSWORD')
+                        string(credentialsId: 'MYSQL_PASSWORD', variable: 'MYSQL_PASSWORD'),
+                        string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET')
                 ]) {
                     script {
                         if (params.RESET_DB) {
