@@ -2,9 +2,12 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api';
 import { isClockInputMaybeValid, parseClockToMinutes } from '../utils/duration';
+import { usePageMeta } from '../utils/pageMeta';
 
 export default function AddWorkout() {
   const navigate = useNavigate();
+
+  usePageMeta({ title: 'Momentum — Add Workout', description: 'Add a new cardio or weightlifting workout.' });
 
   const [workoutType, setWorkoutType] = React.useState('Cardio');
   const [workoutName, setWorkoutName] = React.useState('');
@@ -18,10 +21,23 @@ export default function AddWorkout() {
   const [existingNames, setExistingNames] = React.useState([]);
   const [error, setError] = React.useState('');
 
+  const [namesLoading, setNamesLoading] = React.useState(true);
+  const abortRef = React.useRef(null);
+
   React.useEffect(() => {
-    apiFetch('/workouts/names')
+    setNamesLoading(true);
+    abortRef.current?.abort?.();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    apiFetch('/workouts/names', { signal: controller.signal })
       .then((names) => setExistingNames(names || []))
-      .catch(() => setExistingNames([]));
+      .catch(() => setExistingNames([]))
+      .finally(() => {
+        if (abortRef.current === controller) setNamesLoading(false);
+      });
+
+    return () => abortRef.current?.abort?.();
   }, []);
 
   async function onSubmit(e) {
@@ -58,6 +74,7 @@ export default function AddWorkout() {
       <div className="page page-narrow">
         <h2>Add a New Workout</h2>
         {error ? <div className="error-message">{error}</div> : null}
+        {namesLoading ? <div style={{ padding: '8px 0', opacity: 0.8 }}>Loading workout names…</div> : null}
 
         <form onSubmit={onSubmit} className="workout-form">
         <label>

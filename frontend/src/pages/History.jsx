@@ -2,27 +2,42 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../api';
 import { formatMinutesAsClock } from '../utils/duration';
+import { usePageMeta } from '../utils/pageMeta';
 
 export default function History() {
   const [items, setItems] = React.useState([]);
   const [error, setError] = React.useState('');
+  const [loading, setLoading] = React.useState(true);
+
+  usePageMeta({ title: 'Momentum — Workout History', description: 'View and manage your workout history.' });
+
+  const abortRef = React.useRef(null);
 
   async function load() {
     setError('');
+    setLoading(true);
+    abortRef.current?.abort?.();
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
-      const rows = await apiFetch('/workouts/history');
+      const rows = await apiFetch('/workouts/history', { signal: controller.signal });
       setItems(rows || []);
     } catch (err) {
+      if (err?.name === 'AbortError') return;
       setError(err?.message || 'Failed to load history');
+    } finally {
+      if (abortRef.current === controller) setLoading(false);
     }
   }
 
   React.useEffect(() => {
     load();
+    return () => abortRef.current?.abort?.();
   }, []);
 
   async function onDelete(id) {
     if (!window.confirm('Delete this workout?')) return;
+    if (loading) return;
     await apiFetch(`/workouts/${id}`, { method: 'DELETE' });
     load();
   }
@@ -32,6 +47,7 @@ export default function History() {
       <div className="page">
         <h2>Workout History</h2>
         {error ? <div className="error-message">{error}</div> : null}
+        {loading ? <div style={{ padding: '8px 0', opacity: 0.8 }}>Loading history…</div> : null}
 
         <div className="table-scroll">
           <table>
@@ -60,12 +76,12 @@ export default function History() {
                 <td>
                   <div className="action-buttons">
                     <Link className="edit-btn" to={`/workouts/${w.workoutId}/edit`}>Edit</Link>
-                    <button className="delete-btn" type="button" onClick={() => onDelete(w.workoutId)}>Delete</button>
+                    <button className="delete-btn" type="button" onClick={() => onDelete(w.workoutId)} disabled={loading}>Delete</button>
                   </div>
                 </td>
               </tr>
             ))}
-            {items.length === 0 ? (
+            {!loading && items.length === 0 ? (
               <tr><td colSpan={8}>No workouts yet</td></tr>
             ) : null}
           </tbody>

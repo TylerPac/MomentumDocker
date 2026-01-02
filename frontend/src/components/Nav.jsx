@@ -27,8 +27,7 @@ export default function Nav() {
   return (
     <nav className="sidebar" aria-label="Primary">
       <div className="sidebar-header">
-        <div className="sidebar-brand">Momentum</div>
-        <div className="sidebar-user">{user.username}</div>
+        <img className="sidebar-logo-img" src="/logo512.png" alt="Momentum logo" />
       </div>
 
       <div className="sidebar-nav">

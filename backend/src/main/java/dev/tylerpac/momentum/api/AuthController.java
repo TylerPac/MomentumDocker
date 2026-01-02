@@ -47,7 +47,14 @@ public class AuthController {
             );
 
             String token = jwtService.generateToken(auth.getName(), auth.getAuthorities());
-            return new AuthTokenResponse(token, "Bearer", jwtService.getExpirationSeconds());
+                Users user = usersRepository.findByUsername(auth.getName())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not signed in"));
+                return new AuthTokenResponse(
+                    token,
+                    "Bearer",
+                    jwtService.getExpirationSeconds(),
+                    new UserDto(user.getUserId(), user.getUsername())
+                );
         } catch (Exception ex) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
         }
@@ -71,8 +78,13 @@ public class AuthController {
         user.setPasswordHash(passwordEncoder.encode(password));
         Users saved = usersRepository.save(user);
 
-        String token = jwtService.generateToken(saved.getUsername(), java.util.List.of(() -> "ROLE_USER"));
-        return new AuthTokenResponse(token, "Bearer", jwtService.getExpirationSeconds());
+        String token = jwtService.generateToken(saved.getUsername(), java.util.List.<org.springframework.security.core.GrantedAuthority>of(() -> "ROLE_USER"));
+        return new AuthTokenResponse(
+            token,
+            "Bearer",
+            jwtService.getExpirationSeconds(),
+            new UserDto(saved.getUserId(), saved.getUsername())
+        );
     }
 
     @PostMapping("/logout")

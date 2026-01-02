@@ -2,10 +2,13 @@ import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../api';
 import { formatMinutesAsClock, isClockInputMaybeValid, parseClockToMinutes } from '../utils/duration';
+import { usePageMeta } from '../utils/pageMeta';
 
 export default function EditWorkout() {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  usePageMeta({ title: 'Momentum — Edit Workout', description: 'Edit an existing workout.' });
 
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState('');
@@ -18,10 +21,15 @@ export default function EditWorkout() {
   const [time, setTime] = React.useState('');
   const [weight, setWeight] = React.useState('');
   const [reps, setReps] = React.useState('');
+  const abortRef = React.useRef(null);
 
   React.useEffect(() => {
     setLoading(true);
-    apiFetch(`/workouts/${id}`)
+    abortRef.current?.abort?.();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    apiFetch(`/workouts/${id}`, { signal: controller.signal })
       .then((w) => {
         const type = w.workoutType || 'Cardio';
         setWorkoutType(type);
@@ -32,8 +40,15 @@ export default function EditWorkout() {
         setWeight(w.weight ?? '');
         setReps(w.reps ?? '');
       })
-      .catch((err) => setError(err?.message || 'Failed to load workout'))
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        if (err?.name === 'AbortError') return;
+        setError(err?.message || 'Failed to load workout');
+      })
+      .finally(() => {
+        if (abortRef.current === controller) setLoading(false);
+      });
+
+    return () => abortRef.current?.abort?.();
   }, [id]);
 
   async function onSubmit(e) {

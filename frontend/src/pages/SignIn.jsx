@@ -2,14 +2,17 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch, setAccessToken } from '../api';
 import { useAuth } from '../auth';
+import { usePageMeta } from '../utils/pageMeta';
 
 export default function SignIn() {
   const navigate = useNavigate();
-  const { user, loading, refresh } = useAuth();
+  const { user, loading, refresh, setUser } = useAuth();
   const [mode, setMode] = React.useState('signin');
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [error, setError] = React.useState('');
+
+  usePageMeta({ title: 'Momentum — Sign In', description: 'Sign in to Momentum to track workouts.' });
 
   React.useEffect(() => {
     document.body.classList.add('login-body');
@@ -34,7 +37,14 @@ export default function SignIn() {
         body: JSON.stringify({ username, password }),
       });
       setAccessToken(tokenRes?.accessToken);
-      await refresh();
+
+      // Optimistic auth: backend now returns the user in the login/register response.
+      // This avoids a second round-trip to /auth/me for faster perceived login.
+      if (tokenRes?.user) {
+        setUser(tokenRes.user);
+      } else {
+        await refresh();
+      }
       navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err?.message || 'Sign-in failed');
@@ -43,8 +53,7 @@ export default function SignIn() {
 
   return (
     <>
-      <h1 className="logo-name">Momentum</h1>
-
+      <img className="logo" src="/MomentumLogo.png" alt="Momentum logo" />
       <form onSubmit={onSubmit} className="login-form" style={{ width: 'min(420px, 90vw)' }}>
         <input
           value={username}
