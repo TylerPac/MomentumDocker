@@ -1,0 +1,621 @@
+@import './tokens.css';
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+.page {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+}
+
+.page-narrow {
+  width: min(640px, 100%);
+}
+
+body.login-body {
+  background: linear-gradient(var(--color-bg-0), var(--color-bg-1)); /* Smooth dark blue gradient */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  font-family: var(--font-body);
+}
+
+.logo {
+  width: min(420px, 80vw);
+  margin-bottom: 30px;
+}
+
+.logo-name {
+  justify-content: center;
+  font-family: var(--font-body);
+  color: var(--color-text);
+}
+
+.login-form input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-2);
+  color: var(--color-text);
+  font-size: 16px;
+  text-align: center;
+}
+
+.login-form input::placeholder {
+  color: var(--color-placeholder);
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  align-items: center;
+}
+
+.btn-login,
+.btn-create {
+  background-color: var(--color-accent);
+  border: none;
+  color: var(--color-text);
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: var(--radius-pill);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 80%;
+  justify-content: center;
+}
+
+.btn-login:hover,
+.btn-create:hover {
+  background-color: var(--color-accent-hover);
+}
+
+body.dashboard-body {
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--color-bg-0);
+  height: 100vh;
+  color: var(--color-text);
+}
+
+/* React renders Nav + pages under #root, so #root must be the flex container. */
+body.dashboard-body #root {
+  display: flex;
+  min-height: 100vh;
+}
+
+body.dashboard-body a {
+  color: var(--color-text);
+}
+
+body.dashboard-body input,
+body.dashboard-body select,
+body.dashboard-body button {
+  font-family: var(--font-body);
+}
+
+body.dashboard-body input,
+body.dashboard-body select {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: #ffffff;
+  color: #0f1b2b;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+body.dashboard-body label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background-color: var(--color-accent);
+  border: none;
+  color: var(--color-text);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-accent-hover);
+}
+
+/* Sidebar */
+.sidebar {
+  background-color: var(--color-surface);
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 16px;
+  gap: 14px;
+  box-sizing: border-box;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+}
+
+.sidebar-header {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sidebar-brand {
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.sidebar-user {
+  opacity: 0.9;
+  font-size: 0.95rem;
+  margin-top: 4px;
+}
+
+.sidebar-logo-img {
+  width: 60px;
+  margin-bottom: 30px;
+}
+
+.sidebar-nav {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar-nav a {
+  color: var(--color-text);
+  text-decoration: none;
+  margin: 0;
+  display: block;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: left;
+}
+
+.edit-btn,
+.delete-btn,
+.logout-btn {
+  background-color: var(--color-accent);
+  border: none;
+  color: var(--color-text);
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: auto; /* Don't stretch */
+  text-align: center;
+}
+
+.logout-btn:hover,
+.delete-btn:hover,
+.edit-btn:hover {
+  background-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.sidebar-nav a:hover,
+.logout-btn:hover {
+  background-color: var(--color-accent);
+}
+
+.logout-form-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: auto;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 20px;
+  background-color: var(--color-bg-1);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: auto;
+}
+
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Topbar */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-box {
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: none;
+  width: 200px;
+  background-color: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+}
+
+.username {
+  margin-right: 10px;
+}
+
+.profile-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+/* Dashboard Widgets */
+.dashboard-widgets {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.widget {
+  background-color: var(--color-surface);
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  width: 30%;
+  text-align: center;
+}
+
+/* Dashboard Chart */
+.dashboard-chart {
+  background-color: var(--color-surface);
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: var(--radius-lg);
+}
+
+/* Dashboard controls + charts */
+.dashboard-controls {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.dashboard-controls label {
+  min-width: 220px;
+}
+
+.dashboard-summary {
+  margin-left: 12px;
+  color: var(--color-placeholder);
+  font-weight: 600;
+}
+
+.dashboard-summary strong {
+  color: var(--color-text);
+}
+
+.dashboard-charts {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.chart-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+}
+
+.chart-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.chart-card__title {
+  font-weight: 800;
+}
+
+.chart-card__meta {
+  color: var(--color-placeholder);
+  font-weight: 600;
+  text-align: right;
+}
+
+.chart-empty {
+  color: var(--color-placeholder);
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.chart-svg {
+  display: block;
+  width: 100%;
+  height: 240px;
+  background-color: var(--color-bg-1);
+  border-radius: var(--radius-md);
+}
+
+.chart-wrap {
+  position: relative;
+}
+
+.chart-axis {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.chart-axis-label {
+  fill: var(--color-placeholder);
+  font-size: 12px;
+  font-weight: 700;
+  user-select: none;
+  pointer-events: none;
+}
+
+.chart-tick-label {
+  fill: var(--color-placeholder);
+  font-size: 11px;
+  font-weight: 700;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* HTML overlay labels (so text doesn't stretch with SVG) */
+.chart-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.chart-y-tick {
+  position: absolute;
+  transform: translate(calc(-100% - 10px), -50%);
+  color: var(--color-placeholder);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.chart-x-tick {
+  position: absolute;
+  transform: translate(-50%, 12px);
+  color: var(--color-placeholder);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.chart-y-axis-label {
+  position: absolute;
+  top: 50%;
+  /* Use a constant offset so labels align the same regardless of text width */
+  transform: translate(-44px, -50%) rotate(-90deg);
+  transform-origin: left top;
+  color: var(--color-placeholder);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.chart-grid {
+  stroke: var(--color-border);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  opacity: 0.7;
+}
+
+.chart-series {
+  color: var(--color-accent);
+}
+
+.chart-area {
+  pointer-events: none;
+}
+
+.chart-line {
+  stroke: currentColor;
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.chart-point {
+  fill: currentColor;
+}
+
+.chart-hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.chart-point--active {
+  stroke: var(--color-text);
+  stroke-width: 1.5;
+}
+
+.chart-tooltip {
+  position: absolute;
+  transform: translate(-50%, -115%);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  min-width: 110px;
+  pointer-events: none;
+}
+
+.chart-tooltip__label {
+  color: var(--color-placeholder);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.chart-tooltip__value {
+  color: var(--color-text);
+  font-weight: 900;
+  margin-top: 2px;
+}
+
+.Workout-History-Table {
+  background-color: var(--color-surface);
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: var(--radius-lg);
+}
+
+table tr td,
+table tr th {
+  padding: 10px;
+  text-align: left;
+}
+
+table tr:nth-child(even) {
+  background-color: var(--color-surface-2);
+}
+
+table tr:nth-child(odd) {
+  background-color: var(--color-surface);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table tr:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.chart-placeholder {
+  height: 300px;
+  background-color: var(--color-surface-2);
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.error-message {
+  color: var(--color-error);
+  margin-top: 10px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.success-message {
+  color: var(--color-success);
+  margin-top: 10px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.workout-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.workout-form input,
+.workout-form select,
+.workout-form button {
+  padding: 0.8rem;
+  border-radius: var(--radius-md);
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+label.visually-hidden {
+  position: absolute;
+  left: -9999px;
+}
+
+@media (max-width: 820px) {
+  body.dashboard-body {
+    display: block;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  body.dashboard-body #root {
+    display: block;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    width: 100%;
+    padding: 12px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    height: auto;
+    position: static;
+  }
+
+  .sidebar-header {
+    width: auto;
+    padding: 0;
+  }
+
+  .sidebar-nav {
+    width: auto;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    flex-direction: row;
+  }
+
+  .sidebar-nav a {
+    margin: 0;
+    padding: 8px 10px;
+    font-size: 0.95rem;
+    text-align: center;
+  }
+
+  .logout-form-container {
+    width: auto;
+    margin-top: 0;
+  }
+
+  .main-content {
+    padding: 14px;
+    overflow: visible;
+  }
+}

@@ -31,5 +31,11 @@ build/
 
 ### VS Code ###
 .vscode/
-.github/
+
+# Local env files
+.env
+.env.*
+
+# Codacy CLI artifacts
 .codacy/
+.github/

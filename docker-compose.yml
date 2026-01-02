@@ -1,26 +1,8 @@
 services:
-  momentum-app:
-    build: .
-    image: momentum-app
-    container_name: momentum
-    ports:
-      - "8082:8080"
-    depends_on:
-      momentum-db:
-        condition: service_healthy
-    restart: always
-    environment:
-      - MYSQL_HOST=${MYSQL_HOST:-momentum-db}
-      - MYSQL_DATABASE=${MYSQL_DATABASE:-momentum}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-    networks:
-      - momentum-net
-
-  momentum-db:
+  mysql:
     image: mysql:8.0
-    container_name: momentum-db
-    restart: always
+    container_name: momentum-mysql
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-momentum}
@@ -28,18 +10,41 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3307:3306"  # Different port to avoid conflict with TylerPacDevelopment
-    networks:
-      - momentum-net
     volumes:
-      - momentum-db-data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - mysql_data:/var/lib/mysql
+    networks:
+      - backend
 
-networks:
-  momentum-net:
+  backend:
+    build:
+      context: ./backend
+    image: momentum-backend
+    container_name: momentum-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-momentum}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "8085:8080"
+    depends_on:
+      - mysql
+    networks:
+      - backend
+
+  frontend:
+    build:
+      context: ./frontend
+    image: momentum-frontend
+    container_name: momentum-frontend
+    ports:
+      - "8082:80"
+    depends_on:
+      - backend
+    networks:
+      - backend
 
 volumes:
-  momentum-db-data:
+  mysql_data:
+
+networks:
+  backend:
