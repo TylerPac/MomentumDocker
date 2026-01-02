@@ -68,12 +68,6 @@ export default function Dashboard() {
   const graph1AxisLabel = isCardio ? 'Pace' : 'Weight';
   const graph2AxisLabel = isCardio ? 'Distance' : 'Reps';
 
-  // Make cardio charts "clean" with fixed increments.
-  const graph1TickMin = isCardio ? 8 : undefined;
-  const graph1TickStep = isCardio ? 0.5 : undefined; // 30s if pace is stored as minutes
-  const graph2TickMin = isCardio ? 1.5 : undefined;
-  const graph2TickStep = isCardio ? 0.25 : undefined;
-
   return (
     <div className="main-content">
       <h2>Dashboard</h2>
@@ -113,8 +107,6 @@ export default function Dashboard() {
           values={data?.graph1Values || []}
           yLabel={graph1Label}
           yAxisLabel={graph1AxisLabel}
-          yTickMin={graph1TickMin}
-          yTickStep={graph1TickStep}
         />
         <LineChart
           title={graph2Title}
@@ -122,8 +114,6 @@ export default function Dashboard() {
           values={data?.graph2Values || []}
           yLabel={graph2Label}
           yAxisLabel={graph2AxisLabel}
-          yTickMin={graph2TickMin}
-          yTickStep={graph2TickStep}
         />
       </div>
 

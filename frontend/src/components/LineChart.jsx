@@ -69,33 +69,58 @@ export default function LineChart({ title, labels, values, yLabel, yAxisLabel, y
   React.useEffect(() => {
     if (!svgRef.current) return;
 
-    function updateScale() {
+    let rafId = 0;
+
+    function measureScale() {
       const svg = svgRef.current;
       if (!svg) return;
 
       // Prefer CTM because it reflects actual viewBox->screen scale,
       // even when CSS/layout causes non-uniform stretching.
       const ctm = typeof svg.getScreenCTM === 'function' ? svg.getScreenCTM() : null;
-      const sx = clampNumber(ctm?.a, NaN);
-      const sy = clampNumber(ctm?.d, NaN);
+      // Use the lengths of transformed unit vectors to account for
+      // any skew/rotation that can appear in the CTM.
+      const sx = ctm ? clampNumber(Math.hypot(ctm.a, ctm.c), NaN) : NaN;
+      const sy = ctm ? clampNumber(Math.hypot(ctm.b, ctm.d), NaN) : NaN;
       if (Number.isFinite(sx) && sx > 0 && Number.isFinite(sy) && sy > 0) {
-        setSvgScale({ sx, sy });
+        setSvgScale((prev) => (
+          Math.abs(prev.sx - sx) < 1e-4 && Math.abs(prev.sy - sy) < 1e-4
+            ? prev
+            : { sx, sy }
+        ));
         return;
       }
 
       // Fallback for environments where getScreenCTM is unavailable.
       const rect = svg.getBoundingClientRect();
       if (!rect || rect.width <= 0 || rect.height <= 0) return;
-      setSvgScale({ sx: rect.width / width, sy: rect.height / height });
+      const nextSx = rect.width / width;
+      const nextSy = rect.height / height;
+      if (!Number.isFinite(nextSx) || nextSx <= 0 || !Number.isFinite(nextSy) || nextSy <= 0) return;
+      setSvgScale((prev) => (
+        Math.abs(prev.sx - nextSx) < 1e-4 && Math.abs(prev.sy - nextSy) < 1e-4
+          ? prev
+          : { sx: nextSx, sy: nextSy }
+      ));
     }
 
-    updateScale();
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateScale) : null;
+    function scheduleScale() {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        rafId = requestAnimationFrame(measureScale);
+      });
+    }
+
+    scheduleScale();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(scheduleScale) : null;
     ro?.observe(svgRef.current);
-    window.addEventListener('resize', updateScale);
+    window.addEventListener('resize', scheduleScale);
+    document.addEventListener('fullscreenchange', scheduleScale);
     return () => {
+      if (rafId) cancelAnimationFrame(rafId);
       ro?.disconnect();
-      window.removeEventListener('resize', updateScale);
+      window.removeEventListener('resize', scheduleScale);
+      document.removeEventListener('fullscreenchange', scheduleScale);
     };
   }, [width, height]);
 
@@ -112,14 +137,28 @@ export default function LineChart({ title, labels, values, yLabel, yAxisLabel, y
       ? yTickStep
       : niceStepFromRange(dataMin, dataMax, gridLines + 3);
 
-    const start = Number.isFinite(yTickMin)
-      ? yTickMin
-      : floorToStep(dataMin, step);
+    // Add a little padding so points don't sit on the bounds.
+    const span = dataMax - dataMin;
+    const pad = span > 0 ? span * 0.05 : step;
+    let paddedMin = dataMin - pad;
+    let paddedMax = dataMax + pad;
 
-    const end = ceilToStep(dataMax, step);
-    const min = Math.min(start, end);
-    let max = Math.max(start, end);
-    if (min === max) max = min + step;
+    // If a min is provided, treat it as a *preferred* lower bound, but never
+    // allow it to clip the dataset.
+    if (Number.isFinite(yTickMin) && yTickMin <= dataMin) {
+      paddedMin = Math.min(paddedMin, yTickMin);
+    }
+
+    let min = floorToStep(paddedMin, step);
+    let max = ceilToStep(paddedMax, step);
+
+    // These series are non-negative in the app; avoid negative axes.
+    if (dataMin >= 0) min = Math.max(0, min);
+
+    if (min === max) {
+      min = Math.max(0, min - step);
+      max = max + step;
+    }
 
     const ticks = [];
     const maxTicks = 14;
