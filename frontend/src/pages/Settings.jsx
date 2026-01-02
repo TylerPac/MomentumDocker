@@ -2,7 +2,6 @@ import React from 'react';
 import { apiFetch } from '../api';
 import { useAuth } from '../auth';
 import { usePageMeta } from '../utils/pageMeta';
-import { clearAvatarDataUrl, getAvatarDataUrl, setAvatarDataUrl } from '../utils/avatar';
 
 export default function Settings() {
   const { user, setUser } = useAuth();
@@ -16,39 +15,50 @@ export default function Settings() {
   const [success, setSuccess] = React.useState('');
   const [saving, setSaving] = React.useState(false);
 
-  const [avatarPreview, setAvatarPreview] = React.useState(() => getAvatarDataUrl(user?.userId));
+  const [avatarPreview, setAvatarPreview] = React.useState(() => user?.avatarUrl || null);
 
   React.useEffect(() => {
-    setAvatarPreview(getAvatarDataUrl(user?.userId));
-  }, [user?.userId]);
+    setAvatarPreview(user?.avatarUrl || null);
+  }, [user?.avatarUrl]);
 
   async function onAvatarChange(e) {
     const file = e.target.files?.[0];
     if (!file || !user?.userId) return;
+
+    setError('');
+    setSuccess('');
 
     if (!file.type?.startsWith('image/')) {
       setError('Please select an image file');
       return;
     }
 
-    // Local-only avatar storage (browser). Can be upgraded later to server upload.
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = typeof reader.result === 'string' ? reader.result : null;
-      if (!dataUrl) return;
-      setAvatarDataUrl(user.userId, dataUrl);
-      setAvatarPreview(dataUrl);
+    try {
+      const body = new FormData();
+      body.append('file', file);
+      const updated = await apiFetch('/users/me/avatar', { method: 'POST', body });
+      setUser(updated);
+      setAvatarPreview(updated?.avatarUrl || null);
       setSuccess('Avatar updated');
-    };
-    reader.onerror = () => setError('Failed to read image');
-    reader.readAsDataURL(file);
+    } catch (err) {
+      setError(err?.message || 'Failed to upload avatar');
+    }
   }
 
-  function onAvatarRemove() {
+  async function onAvatarRemove() {
     if (!user?.userId) return;
-    clearAvatarDataUrl(user.userId);
-    setAvatarPreview(null);
-    setSuccess('Avatar removed');
+
+    setError('');
+    setSuccess('');
+
+    try {
+      const updated = await apiFetch('/users/me/avatar', { method: 'DELETE' });
+      setUser(updated);
+      setAvatarPreview(updated?.avatarUrl || null);
+      setSuccess('Avatar removed');
+    } catch (err) {
+      setError(err?.message || 'Failed to remove avatar');
+    }
   }
 
   async function onSubmit(e) {
@@ -92,24 +102,24 @@ export default function Settings() {
               <button type="button" className="btn-primary" onClick={onAvatarRemove} disabled={!avatarPreview}>Remove avatar</button>
             </div>
           </div>
-          <div className="settings-help">Avatar is saved in this browser only for now.</div>
+          <div className="settings-help">Avatar is saved to your account.</div>
         </div>
 
         <form onSubmit={onSubmit} className="workout-form" style={{ marginTop: 12 }}>
-        <label>
-          New Username (optional)
-          <input value={newUsername} onChange={(e) => setNewUsername(e.target.value)} />
-        </label>
+          <label>
+            New Username (optional)
+            <input value={newUsername} onChange={(e) => setNewUsername(e.target.value)} />
+          </label>
 
-        <label>
-          Current Password (required)
-          <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />
-        </label>
+          <label>
+            Current Password (required)
+            <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />
+          </label>
 
-        <label>
-          New Password (optional)
-          <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-        </label>
+          <label>
+            New Password (optional)
+            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+          </label>
 
           {error ? <div className="error-message">{error}</div> : null}
           {success ? <div className="success-message">{success}</div> : null}

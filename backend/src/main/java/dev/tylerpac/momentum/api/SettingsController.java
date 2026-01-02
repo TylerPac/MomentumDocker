@@ -16,16 +16,18 @@ public class SettingsController {
 
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserDtoMapper userDtoMapper;
 
-    public SettingsController(UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
+    public SettingsController(UsersRepository usersRepository, PasswordEncoder passwordEncoder, UserDtoMapper userDtoMapper) {
         this.usersRepository = usersRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userDtoMapper = userDtoMapper;
     }
 
     @GetMapping("/me")
     public UserDto me(Authentication authentication) {
         Users user = requireUser(authentication);
-        return new UserDto(user.getUserId(), user.getUsername());
+        return userDtoMapper.toDto(user);
     }
 
     @PutMapping
@@ -51,7 +53,7 @@ public class SettingsController {
         }
 
         Users saved = usersRepository.save(user);
-        return new UserDto(saved.getUserId(), saved.getUsername());
+        return userDtoMapper.toDto(saved);
     }
 
     private Users requireUser(Authentication authentication) {

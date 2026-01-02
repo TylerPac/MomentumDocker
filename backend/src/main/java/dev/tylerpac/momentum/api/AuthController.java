@@ -23,17 +23,20 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final UserDtoMapper userDtoMapper;
 
     public AuthController(
             UsersRepository usersRepository,
             AuthenticationManager authenticationManager,
             JwtService jwtService,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            UserDtoMapper userDtoMapper
     ) {
         this.usersRepository = usersRepository;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
+        this.userDtoMapper = userDtoMapper;
     }
 
     @PostMapping("/login")
@@ -53,7 +56,7 @@ public class AuthController {
                     token,
                     "Bearer",
                     jwtService.getExpirationSeconds(),
-                    new UserDto(user.getUserId(), user.getUsername())
+                    userDtoMapper.toDto(user)
                 );
         } catch (Exception ex) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
@@ -83,7 +86,7 @@ public class AuthController {
             token,
             "Bearer",
             jwtService.getExpirationSeconds(),
-            new UserDto(saved.getUserId(), saved.getUsername())
+            userDtoMapper.toDto(saved)
         );
     }
 
@@ -101,6 +104,6 @@ public class AuthController {
         Users user = usersRepository.findByUsername(authentication.getName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not signed in"));
 
-        return new UserDto(user.getUserId(), user.getUsername());
+        return userDtoMapper.toDto(user);
     }
 }

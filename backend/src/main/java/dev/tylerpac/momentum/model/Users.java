@@ -2,6 +2,8 @@ package dev.tylerpac.momentum.model;
 
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.time.Instant;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,6 +26,12 @@ public class Users {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "avatar_path")
+    private String avatarPath;
+
+    @Column(name = "avatar_updated_at")
+    private Instant avatarUpdatedAt;
+
     public Users() {}
 
     public Users(String username, String plainPassword) {
@@ -45,6 +53,22 @@ public class Users {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getAvatarPath() {
+        return avatarPath;
+    }
+
+    public void setAvatarPath(String avatarPath) {
+        this.avatarPath = avatarPath;
+    }
+
+    public Instant getAvatarUpdatedAt() {
+        return avatarUpdatedAt;
+    }
+
+    public void setAvatarUpdatedAt(Instant avatarUpdatedAt) {
+        this.avatarUpdatedAt = avatarUpdatedAt;
     }
 
     public void setPasswordHash(String passwordHash) {

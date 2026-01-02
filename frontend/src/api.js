@@ -32,7 +32,9 @@ export async function apiFetch(path, options = {}) {
   if (token && !headers.has('Authorization')) {
     headers.set('Authorization', `Bearer ${token}`);
   }
-  if (!headers.has('Content-Type') && options.body != null) {
+
+  const isFormData = (typeof FormData !== 'undefined') && (options.body instanceof FormData);
+  if (!headers.has('Content-Type') && options.body != null && !isFormData) {
     headers.set('Content-Type', 'application/json');
   }
 

@@ -1,6 +1,5 @@
 import React from 'react';
 import { useAuth } from '../auth';
-import { getAvatarDataUrl } from '../utils/avatar';
 
 function initialsFromUsername(username) {
   const s = String(username || '').trim();
@@ -12,34 +11,8 @@ function initialsFromUsername(username) {
 
 export default function UserBadge() {
   const { user } = useAuth();
-  const [avatarSrc, setAvatarSrc] = React.useState(null);
 
-  React.useEffect(() => {
-    if (!user?.userId) {
-      setAvatarSrc(null);
-      return;
-    }
-
-    const key = `momentum.avatar.${user.userId}`;
-    const update = () => setAvatarSrc(getAvatarDataUrl(user.userId));
-    update();
-
-    function onStorage(e) {
-      if (e.key === key) update();
-    }
-
-    function onAvatarUpdated(e) {
-      const updatedUserId = e?.detail?.userId;
-      if (updatedUserId === user.userId) update();
-    }
-
-    window.addEventListener('storage', onStorage);
-    window.addEventListener('momentum:avatar-updated', onAvatarUpdated);
-    return () => {
-      window.removeEventListener('storage', onStorage);
-      window.removeEventListener('momentum:avatar-updated', onAvatarUpdated);
-    };
-  }, [user?.userId]);
+  const avatarSrc = user?.avatarUrl || null;
 
   if (!user) return null;
 
