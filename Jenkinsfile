@@ -27,11 +27,13 @@ pipeline {
                         string(credentialsId: 'MYSQL_USER', variable: 'MYSQL_USER'),
                         string(credentialsId: 'MYSQL_PASSWORD', variable: 'MYSQL_PASSWORD')
                 ]) {
-                    if (params.RESET_DB) {
-                        echo '⚠️ Resetting MySQL volume...'
-                        sh 'docker compose down -v --remove-orphans || true'
-                    } else {
-                        sh 'docker compose down --remove-orphans || true'
+                    script {
+                        if (params.RESET_DB) {
+                            echo '⚠️ Resetting MySQL volume...'
+                            sh 'docker compose down -v --remove-orphans || true'
+                        } else {
+                            sh 'docker compose down --remove-orphans || true'
+                        }
                     }
 
                     sh 'docker compose pull || true'
