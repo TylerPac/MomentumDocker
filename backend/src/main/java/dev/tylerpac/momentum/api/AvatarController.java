@@ -1,16 +1,5 @@
 package dev.tylerpac.momentum.api;
 
-import dev.tylerpac.momentum.api.dto.UserDto;
-import dev.tylerpac.momentum.model.Users;
-import dev.tylerpac.momentum.repository.UsersRepository;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,6 +9,22 @@ import java.time.Instant;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
+import dev.tylerpac.momentum.api.dto.UserDto;
+import dev.tylerpac.momentum.model.Users;
+import dev.tylerpac.momentum.repository.UsersRepository;
 
 @RestController
 @RequestMapping("/api/users/me/avatar")
@@ -98,7 +103,7 @@ public class AvatarController {
         if (relPath == null || relPath.isBlank()) return;
         try {
             Files.deleteIfExists(resolveAvatarPath(relPath));
-        } catch (Exception ignored) {
+        } catch (org.springframework.web.server.ResponseStatusException | IOException | SecurityException ignored) {
             // ignore
         }
     }

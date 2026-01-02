@@ -1,11 +1,11 @@
 package dev.tylerpac.momentum.api;
 
-import dev.tylerpac.momentum.api.dto.DashboardResponse;
-import dev.tylerpac.momentum.api.dto.WorkoutDto;
-import dev.tylerpac.momentum.model.Users;
-import dev.tylerpac.momentum.model.Workout;
-import dev.tylerpac.momentum.repository.UsersRepository;
-import dev.tylerpac.momentum.repository.WorkoutRepository;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +14,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import dev.tylerpac.momentum.api.dto.DashboardResponse;
+import dev.tylerpac.momentum.api.dto.WorkoutDto;
+import dev.tylerpac.momentum.model.Users;
+import dev.tylerpac.momentum.model.Workout;
+import dev.tylerpac.momentum.repository.UsersRepository;
+import dev.tylerpac.momentum.repository.WorkoutRepository;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -77,9 +82,20 @@ public class DashboardController {
                 graph1Values.add(pace);
                 graph2Values.add(w.getDistance());
             } else if ("Weightlifting".equals(resolvedType)
-                    && w.getWeight() != null && w.getReps() != null) {
-                graph1Values.add(w.getWeight());
-                graph2Values.add(w.getReps().floatValue());
+                    && w.getReps() != null) {
+                if (w.getWeight() != null) {
+                    graph1Values.add(w.getWeight());
+                }
+
+                Integer setsBoxed = w.getSets();
+                int sets = setsBoxed != null ? setsBoxed : 1;
+                int reps = w.getReps();
+                float totalReps = Math.max(0, sets) * Math.max(0, reps);
+                if (w.getWeight() != null) {
+                    graph2Values.add(w.getWeight() * totalReps);
+                } else {
+                    graph2Values.add(totalReps);
+                }
             }
         }
 
@@ -129,6 +145,7 @@ public class DashboardController {
                 w.getDistance(),
                 w.getTime(),
                 w.getWeight(),
+                w.getSets(),
                 w.getReps()
         );
     }

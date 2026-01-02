@@ -61,58 +61,86 @@ export default function LineChart({ title, labels, values, yLabel, yAxisLabel, y
   const gradientId = React.useId();
 
   const svgRef = React.useRef(null);
-  const [svgScale, setSvgScale] = React.useState(1);
+  const wrapRef = React.useRef(null);
+  const [svgScale, setSvgScale] = React.useState({ x: 1, y: 1 });
 
   const [hoveredIndex, setHoveredIndex] = React.useState(-1);
   const [hoverPos, setHoverPos] = React.useState(null);
 
   React.useEffect(() => {
-    if (!svgRef.current) return;
-
     let rafId = 0;
+    let t1 = 0;
+    let t2 = 0;
 
     function measureScale() {
       const svg = svgRef.current;
+      const wrap = wrapRef.current;
       if (!svg) return;
 
-      // Prefer CTM because it reflects actual viewBox->screen scale,
-      // even when CSS/layout causes non-uniform stretching.
-      const ctm = typeof svg.getScreenCTM === 'function' ? svg.getScreenCTM() : null;
-      // Use the lengths of transformed unit vectors to account for
-      // any skew/rotation that can appear in the CTM.
-      const s = ctm ? clampNumber(Math.hypot(ctm.a, ctm.c), NaN) : NaN;
-      if (Number.isFinite(s) && s > 0) {
-        setSvgScale((prev) => (Math.abs(prev - s) < 1e-4 ? prev : s));
-        return;
-      }
+      // Prefer SVG bounding box (most accurate), but fall back to wrapper if the
+      // SVG is temporarily 0x0 during layout/maximize.
+      const svgRect = svg.getBoundingClientRect();
+      const rect = (svgRect?.width > 0 && svgRect?.height > 0)
+        ? svgRect
+        : wrap?.getBoundingClientRect?.();
 
-      // Fallback for environments where getScreenCTM is unavailable.
-      const rect = svg.getBoundingClientRect();
       if (!rect || rect.width <= 0 || rect.height <= 0) return;
-      const nextS = rect.width / width;
-      if (!Number.isFinite(nextS) || nextS <= 0) return;
-      setSvgScale((prev) => (Math.abs(prev - nextS) < 1e-4 ? prev : nextS));
+
+      const nextX = rect.width / width;
+      const nextY = rect.height / height;
+      if (!Number.isFinite(nextX) || nextX <= 0) return;
+      if (!Number.isFinite(nextY) || nextY <= 0) return;
+
+      setSvgScale((prev) => (
+        Math.abs(prev.x - nextX) < 1e-4 && Math.abs(prev.y - nextY) < 1e-4
+          ? prev
+          : { x: nextX, y: nextY }
+      ));
     }
 
     function scheduleScale() {
       if (rafId) cancelAnimationFrame(rafId);
+      if (t1) clearTimeout(t1);
+      if (t2) clearTimeout(t2);
+
       rafId = requestAnimationFrame(() => {
         rafId = requestAnimationFrame(measureScale);
       });
+
+      // Some maximize/layout changes settle after ResizeObserver fires; re-check.
+      t1 = window.setTimeout(measureScale, 50);
+      t2 = window.setTimeout(measureScale, 250);
     }
 
     scheduleScale();
     const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(scheduleScale) : null;
-    ro?.observe(svgRef.current);
+
+    const wrap = wrapRef.current;
+    const svg = svgRef.current;
+    if (wrap) ro?.observe(wrap);
+    if (svg) ro?.observe(svg);
+
     window.addEventListener('resize', scheduleScale);
     document.addEventListener('fullscreenchange', scheduleScale);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', scheduleScale);
+    }
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(scheduleScale).catch(() => {});
+    }
+
     return () => {
       if (rafId) cancelAnimationFrame(rafId);
+      if (t1) clearTimeout(t1);
+      if (t2) clearTimeout(t2);
       ro?.disconnect();
       window.removeEventListener('resize', scheduleScale);
       document.removeEventListener('fullscreenchange', scheduleScale);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', scheduleScale);
+      }
     };
-  }, [width]);
+  }, [width, height]);
 
   const yScale = React.useMemo(() => {
     const ys = (values || []).map((v) => clampNumber(v, 0));
@@ -247,10 +275,11 @@ export default function LineChart({ title, labels, values, yLabel, yAxisLabel, y
       {points.length === 0 ? (
         <div className="chart-empty">No data</div>
       ) : (
-        <div className="chart-wrap">
+        <div className="chart-wrap" ref={wrapRef}>
           <svg
             className="chart-svg"
             viewBox={`0 0 ${width} ${height}`}
+            preserveAspectRatio="none"
             onMouseLeave={hideTooltip}
             ref={svgRef}
           >
@@ -293,30 +322,37 @@ export default function LineChart({ title, labels, values, yLabel, yAxisLabel, y
               const isActive = idx === hoveredIndex;
               const r = isActive ? 4 : 3;
               const hit = 12;
-              // Keep markers perfectly circular. We compensate the radius by the (uniform)
-              // svg->screen scale so points don't grow/shrink with layout changes.
-              const rr = r / (svgScale || 1);
-              const hitR = hit / (svgScale || 1);
+              // The SVG is stretched to fill its container (non-uniform X/Y scaling).
+              // Use an ellipse with compensated radii so points remain visually circular.
+              const sx = svgScale?.x || 1;
+              const sy = svgScale?.y || 1;
+              const rrX = r / sx;
+              const rrY = r / sy;
+              const hitRX = hit / sx;
+              const hitRY = hit / sy;
 
               return (
                 <g key={idx}>
                   {/* larger invisible hit target for hover */}
-                  <circle
+                  <ellipse
                     className="chart-hit"
                     cx={p.x}
                     cy={p.y}
-                    r={hitR}
+                    rx={hitRX}
+                    ry={hitRY}
                     onMouseEnter={() => showTooltip(idx)}
                     onMouseMove={() => showTooltip(idx)}
                     onFocus={() => showTooltip(idx)}
                     onBlur={hideTooltip}
                     tabIndex={0}
                   />
-                  <circle
+                  <ellipse
                     className={isActive ? 'chart-point chart-point--active' : 'chart-point'}
                     cx={p.x}
                     cy={p.y}
-                    r={rr}
+                    rx={rrX}
+                    ry={rrY}
+                    vectorEffect="non-scaling-stroke"
                   />
                 </g>
               );

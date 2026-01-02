@@ -1,8 +1,15 @@
 package dev.tylerpac.momentum.model;
 
-import jakarta.persistence.*;
-
 import java.sql.Date;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "workouts")
@@ -35,13 +42,16 @@ public class Workout {
     @Column(name = "weight")
     private Float weight;
 
+    @Column(name = "sets")
+    private Integer sets;
+
     @Column(name = "reps")
     private Integer reps;
 
     public Workout() {}
 
     public Workout(Users user, String workoutType, String workoutName, Date workoutDate,
-                  Float distance, Float time, Float weight, Integer reps) {
+                  Float distance, Float time, Float weight, Integer sets, Integer reps) {
         this.user = user;
         this.workoutType = workoutType;
         this.workoutName = workoutName;
@@ -49,6 +59,7 @@ public class Workout {
         this.distance = distance;
         this.time = time;
         this.weight = weight;
+        this.sets = sets;
         this.reps = reps;
     }
 
@@ -110,6 +121,14 @@ public class Workout {
 
     public void setWeight(Float weight) {
         this.weight = weight;
+    }
+
+    public Integer getSets() {
+        return sets;
+    }
+
+    public void setSets(Integer sets) {
+        this.sets = sets;
     }
 
     public Integer getReps() {

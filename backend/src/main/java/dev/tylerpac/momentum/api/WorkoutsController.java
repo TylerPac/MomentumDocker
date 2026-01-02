@@ -1,18 +1,26 @@
 package dev.tylerpac.momentum.api;
 
+import java.sql.Date;
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
 import dev.tylerpac.momentum.api.dto.WorkoutDto;
 import dev.tylerpac.momentum.api.dto.WorkoutUpsertRequest;
 import dev.tylerpac.momentum.model.Users;
 import dev.tylerpac.momentum.model.Workout;
 import dev.tylerpac.momentum.repository.UsersRepository;
 import dev.tylerpac.momentum.repository.WorkoutRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.sql.Date;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/workouts")
@@ -113,6 +121,7 @@ public class WorkoutsController {
         workout.setDistance(req.distance());
         workout.setTime(req.time());
         workout.setWeight(req.weight());
+        workout.setSets(req.sets());
         workout.setReps(req.reps());
     }
 
@@ -126,6 +135,7 @@ public class WorkoutsController {
                 w.getDistance(),
                 w.getTime(),
                 w.getWeight(),
+                w.getSets(),
                 w.getReps()
         );
     }

@@ -60,13 +60,13 @@ export default function Dashboard() {
 
   const isCardio = workoutType === 'Cardio';
   const graph1Label = isCardio ? 'Pace (time/distance)' : 'Weight';
-  const graph2Label = isCardio ? 'Distance' : 'Reps';
+  const graph2Label = isCardio ? 'Distance' : 'Volume (weight × sets × reps)';
 
   const graph1Title = isCardio ? 'Pace' : 'Weight';
-  const graph2Title = isCardio ? 'Distance per run' : 'Reps';
+  const graph2Title = isCardio ? 'Distance per run' : 'Volume';
 
   const graph1AxisLabel = isCardio ? 'Pace' : 'Weight';
-  const graph2AxisLabel = isCardio ? 'Distance' : 'Reps';
+  const graph2AxisLabel = isCardio ? 'Distance' : 'Volume';
 
   return (
     <div className="main-content">
@@ -129,10 +129,18 @@ export default function Dashboard() {
               <th>Date</th>
               <th>Type</th>
               <th>Name</th>
-              <th>Distance</th>
-              <th>Time</th>
-              <th>Weight</th>
-              <th>Reps</th>
+              {isCardio ? (
+                <>
+                  <th>Distance</th>
+                  <th>Time</th>
+                </>
+              ) : (
+                <>
+                  <th>Weight</th>
+                  <th>Sets</th>
+                  <th>Reps</th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -141,14 +149,22 @@ export default function Dashboard() {
                 <td>{w.workoutDate}</td>
                 <td>{w.workoutType}</td>
                 <td>{w.workoutName}</td>
-                <td>{w.distance ?? ''}</td>
-                <td>{w.workoutType === 'Cardio' ? formatMinutesAsClock(w.time) : (w.time ?? '')}</td>
-                <td>{w.weight ?? ''}</td>
-                <td>{w.reps ?? ''}</td>
+                {isCardio ? (
+                  <>
+                    <td>{w.distance ?? ''}</td>
+                    <td>{formatMinutesAsClock(w.time)}</td>
+                  </>
+                ) : (
+                  <>
+                    <td>{w.weight ?? ''}</td>
+                    <td>{w.sets ?? ''}</td>
+                    <td>{w.reps ?? ''}</td>
+                  </>
+                )}
               </tr>
             ))}
             {!loading && (data?.workoutDetails || []).length === 0 ? (
-              <tr><td colSpan={7}>No workouts yet</td></tr>
+              <tr><td colSpan={isCardio ? 5 : 6}>No workouts yet</td></tr>
             ) : null}
           </tbody>
         </table>

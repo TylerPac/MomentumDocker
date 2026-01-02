@@ -45,15 +45,19 @@ export async function apiFetch(path, options = {}) {
 
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
+    let data = null;
     try {
-      const data = await res.json();
+      data = await res.json();
       if (data?.error) message = data.error;
       else if (data?.message) message = data.message;
       else if (data?.detail) message = data.detail;
     } catch {
       // ignore
     }
-    throw new Error(message);
+    const err = new Error(message);
+    err.status = res.status;
+    err.data = data;
+    throw err;
   }
 
   const contentType = res.headers.get('content-type') || '';

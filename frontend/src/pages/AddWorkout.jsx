@@ -16,6 +16,7 @@ export default function AddWorkout() {
   const [distance, setDistance] = React.useState('');
   const [time, setTime] = React.useState('');
   const [weight, setWeight] = React.useState('');
+  const [sets, setSets] = React.useState('');
   const [reps, setReps] = React.useState('');
 
   const [existingNames, setExistingNames] = React.useState([]);
@@ -57,6 +58,7 @@ export default function AddWorkout() {
         distance: workoutType === 'Cardio' && distance !== '' ? Number(distance) : null,
         time: workoutType === 'Cardio' ? parsedTime : null,
         weight: workoutType === 'Weightlifting' && weight !== '' ? Number(weight) : null,
+        sets: workoutType === 'Weightlifting' && sets !== '' ? Number(sets) : null,
         reps: workoutType === 'Weightlifting' && reps !== '' ? Number(reps) : null,
       };
 
@@ -126,6 +128,10 @@ export default function AddWorkout() {
             <label>
               Weight
               <input value={weight} onChange={(e) => setWeight(e.target.value)} inputMode="decimal" />
+            </label>
+            <label>
+              Sets
+              <input value={sets} onChange={(e) => setSets(e.target.value)} inputMode="numeric" />
             </label>
             <label>
               Reps

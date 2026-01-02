@@ -1,14 +1,22 @@
 package dev.tylerpac.momentum.api;
 
+import org.springframework.stereotype.Component;
+
 import dev.tylerpac.momentum.api.dto.UserDto;
 import dev.tylerpac.momentum.model.Users;
-import org.springframework.stereotype.Component;
 
 @Component
 public class UserDtoMapper {
 
     public UserDto toDto(Users user) {
-        return new UserDto(user.getUserId(), user.getUsername(), avatarUrl(user));
+    return new UserDto(
+        user.getUserId(),
+        user.getUsername(),
+        user.getEmail(),
+        user.getFirstName(),
+        user.getLastName(),
+        avatarUrl(user)
+    );
     }
 
     private String avatarUrl(Users user) {

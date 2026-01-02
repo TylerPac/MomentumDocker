@@ -8,5 +8,6 @@ public record WorkoutDto(
         Float distance,
         Float time,
         Float weight,
+        Integer sets,
         Integer reps
 ) {}

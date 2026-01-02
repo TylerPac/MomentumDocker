@@ -59,6 +59,7 @@ export default function History() {
               <th>Distance</th>
               <th>Time</th>
               <th>Weight</th>
+              <th>Sets</th>
               <th>Reps</th>
               <th>Actions</th>
             </tr>
@@ -72,6 +73,7 @@ export default function History() {
                 <td>{w.distance ?? ''}</td>
                 <td>{w.workoutType === 'Cardio' ? formatMinutesAsClock(w.time) : (w.time ?? '')}</td>
                 <td>{w.weight ?? ''}</td>
+                <td>{w.sets ?? ''}</td>
                 <td>{w.reps ?? ''}</td>
                 <td>
                   <div className="action-buttons">
@@ -82,7 +84,7 @@ export default function History() {
               </tr>
             ))}
             {!loading && items.length === 0 ? (
-              <tr><td colSpan={8}>No workouts yet</td></tr>
+              <tr><td colSpan={9}>No workouts yet</td></tr>
             ) : null}
           </tbody>
           </table>
