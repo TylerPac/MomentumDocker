@@ -61,7 +61,7 @@ export default function LineChart({ title, labels, values, yLabel, yAxisLabel, y
   const gradientId = React.useId();
 
   const svgRef = React.useRef(null);
-  const [svgScale, setSvgScale] = React.useState({ sx: 1, sy: 1 });
+  const [svgScale, setSvgScale] = React.useState(1);
 
   const [hoveredIndex, setHoveredIndex] = React.useState(-1);
   const [hoverPos, setHoverPos] = React.useState(null);
@@ -80,28 +80,18 @@ export default function LineChart({ title, labels, values, yLabel, yAxisLabel, y
       const ctm = typeof svg.getScreenCTM === 'function' ? svg.getScreenCTM() : null;
       // Use the lengths of transformed unit vectors to account for
       // any skew/rotation that can appear in the CTM.
-      const sx = ctm ? clampNumber(Math.hypot(ctm.a, ctm.c), NaN) : NaN;
-      const sy = ctm ? clampNumber(Math.hypot(ctm.b, ctm.d), NaN) : NaN;
-      if (Number.isFinite(sx) && sx > 0 && Number.isFinite(sy) && sy > 0) {
-        setSvgScale((prev) => (
-          Math.abs(prev.sx - sx) < 1e-4 && Math.abs(prev.sy - sy) < 1e-4
-            ? prev
-            : { sx, sy }
-        ));
+      const s = ctm ? clampNumber(Math.hypot(ctm.a, ctm.c), NaN) : NaN;
+      if (Number.isFinite(s) && s > 0) {
+        setSvgScale((prev) => (Math.abs(prev - s) < 1e-4 ? prev : s));
         return;
       }
 
       // Fallback for environments where getScreenCTM is unavailable.
       const rect = svg.getBoundingClientRect();
       if (!rect || rect.width <= 0 || rect.height <= 0) return;
-      const nextSx = rect.width / width;
-      const nextSy = rect.height / height;
-      if (!Number.isFinite(nextSx) || nextSx <= 0 || !Number.isFinite(nextSy) || nextSy <= 0) return;
-      setSvgScale((prev) => (
-        Math.abs(prev.sx - nextSx) < 1e-4 && Math.abs(prev.sy - nextSy) < 1e-4
-          ? prev
-          : { sx: nextSx, sy: nextSy }
-      ));
+      const nextS = rect.width / width;
+      if (!Number.isFinite(nextS) || nextS <= 0) return;
+      setSvgScale((prev) => (Math.abs(prev - nextS) < 1e-4 ? prev : nextS));
     }
 
     function scheduleScale() {
@@ -122,7 +112,7 @@ export default function LineChart({ title, labels, values, yLabel, yAxisLabel, y
       window.removeEventListener('resize', scheduleScale);
       document.removeEventListener('fullscreenchange', scheduleScale);
     };
-  }, [width, height]);
+  }, [width]);
 
   const yScale = React.useMemo(() => {
     const ys = (values || []).map((v) => clampNumber(v, 0));
@@ -261,7 +251,6 @@ export default function LineChart({ title, labels, values, yLabel, yAxisLabel, y
           <svg
             className="chart-svg"
             viewBox={`0 0 ${width} ${height}`}
-            preserveAspectRatio="none"
             onMouseLeave={hideTooltip}
             ref={svgRef}
           >
@@ -304,34 +293,30 @@ export default function LineChart({ title, labels, values, yLabel, yAxisLabel, y
               const isActive = idx === hoveredIndex;
               const r = isActive ? 4 : 3;
               const hit = 12;
-              // SVG is stretched to fill the element (preserveAspectRatio="none").
-              // Use ellipses with radii compensated by the X/Y scale so markers stay circular on screen.
-              const rx = r / (svgScale.sx || 1);
-              const ry = r / (svgScale.sy || 1);
-              const hitRx = hit / (svgScale.sx || 1);
-              const hitRy = hit / (svgScale.sy || 1);
+              // Keep markers perfectly circular. We compensate the radius by the (uniform)
+              // svg->screen scale so points don't grow/shrink with layout changes.
+              const rr = r / (svgScale || 1);
+              const hitR = hit / (svgScale || 1);
 
               return (
                 <g key={idx}>
                   {/* larger invisible hit target for hover */}
-                  <ellipse
+                  <circle
                     className="chart-hit"
                     cx={p.x}
                     cy={p.y}
-                    rx={hitRx}
-                    ry={hitRy}
+                    r={hitR}
                     onMouseEnter={() => showTooltip(idx)}
                     onMouseMove={() => showTooltip(idx)}
                     onFocus={() => showTooltip(idx)}
                     onBlur={hideTooltip}
                     tabIndex={0}
                   />
-                  <ellipse
+                  <circle
                     className={isActive ? 'chart-point chart-point--active' : 'chart-point'}
                     cx={p.x}
                     cy={p.y}
-                    rx={rx}
-                    ry={ry}
+                    r={rr}
                   />
                 </g>
               );

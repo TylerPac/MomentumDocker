@@ -102,7 +102,7 @@ body.dashboard-body #root {
   position: fixed;
   top: 14px;
   right: 14px;
-  z-index: 50;
+  z-index: 80;
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -248,6 +248,7 @@ body.dashboard-body label {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .sidebar-brand {
@@ -265,6 +266,158 @@ body.dashboard-body label {
   width: 110px;
   height: auto;
   display: block;
+}
+
+/* Mobile hamburger menu (hidden on desktop) */
+.mobile-menu-btn {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  cursor: pointer;
+}
+
+.mobile-menu-icon {
+  display: block;
+  width: 18px;
+  height: 12px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.mobile-menu-icon::before,
+.mobile-menu-icon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-text);
+  border-radius: 999px;
+}
+
+.mobile-menu-icon::before {
+  top: 0;
+  box-shadow: 0 5px 0 0 var(--color-text);
+}
+
+.mobile-menu-icon::after {
+  bottom: 0;
+}
+
+.mobile-menu-icon--open::before {
+  top: 5px;
+  box-shadow: none;
+  transform: rotate(45deg);
+}
+
+.mobile-menu-icon--open::after {
+  bottom: 5px;
+  transform: rotate(-45deg);
+}
+
+.mobile-menu {
+  display: none;
+}
+
+@media (max-width: 820px) {
+  .mobile-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 65;
+  }
+
+  /* Keep the user badge in the top bar on mobile. */
+  .user-badge {
+    top: 14px;
+    right: 14px;
+    background-color: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  .user-badge__name {
+    max-width: 140px;
+  }
+
+  /* Mobile top bar: hamburger on the left, no logo. */
+  .sidebar-header {
+    justify-content: flex-start;
+  }
+
+  .sidebar-logo-img {
+    display: none;
+  }
+
+  .mobile-menu-btn {
+    position: static;
+    transform: none;
+  }
+
+  /* Hide desktop nav links + logout in the top bar; show via overlay instead. */
+  .sidebar-nav {
+    display: none;
+  }
+
+  .logout-form-container {
+    display: none;
+  }
+
+  .mobile-menu {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background-color: var(--color-bg-0);
+    transform: translateX(-100%);
+    transition: transform 220ms ease;
+  }
+
+  .mobile-menu--open {
+    transform: translateX(0);
+  }
+
+  .mobile-menu__content {
+    height: 100%;
+    padding: 18px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .mobile-menu__spacer {
+    height: 52px;
+  }
+
+  .mobile-menu__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mobile-menu__nav a {
+    color: var(--color-text);
+    text-decoration: none;
+    padding: 12px 12px;
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    font-weight: 800;
+  }
+
+  .mobile-menu__footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: flex-start;
+  }
 }
 
 .sidebar-userblock {
@@ -346,6 +499,12 @@ body.dashboard-body label {
   flex-direction: column;
   gap: 14px;
   overflow: auto;
+}
+
+/* Center top page titles (Dashboard, Settings, etc.) */
+.main-content > h2 {
+  text-align: center;
+  margin-top: 0;
 }
 
 .table-scroll {
@@ -682,13 +841,15 @@ label.visually-hidden {
 
   .sidebar {
     width: 100%;
-    padding: 12px;
+    padding: 8px 12px;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     gap: 10px;
-    height: auto;
-    position: static;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 70;
   }
 
   .sidebar-header {
@@ -697,29 +858,32 @@ label.visually-hidden {
   }
 
   .sidebar-nav {
-    width: auto;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: center;
-    flex-direction: row;
-  }
-
-  .sidebar-nav a {
-    margin: 0;
-    padding: 8px 10px;
-    font-size: 0.95rem;
-    text-align: center;
+    display: none;
   }
 
   .logout-form-container {
-    width: auto;
-    margin-top: 0;
+    display: none;
   }
 
   .main-content {
     padding: 14px;
     overflow: visible;
+  }
+
+  /* Dashboard: keep the two selects on one row, summary below. */
+  .dashboard-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+    align-items: end;
+  }
+
+  .dashboard-controls label {
+    min-width: 0;
+  }
+
+  .dashboard-summary {
+    grid-column: 1 / -1;
+    margin-left: 0;
   }
 }
