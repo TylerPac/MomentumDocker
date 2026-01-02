@@ -20,18 +20,26 @@ body {
 
 body.login-body {
   background: linear-gradient(var(--color-bg-0), var(--color-bg-1)); /* Smooth dark blue gradient */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
   font-family: var(--font-body);
 }
 
+/* React renders under #root; center the login content there. */
+body.login-body #root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 .logo {
   width: min(420px, 80vw);
-  margin-bottom: 14px;
+  display: block;
+  margin: 0 auto 14px;
 }
 
 .logo-name {
@@ -50,6 +58,7 @@ body.login-body {
   color: var(--color-text);
   font-size: 16px;
   text-align: center;
+  box-sizing: border-box;
 }
 
 .login-form input::placeholder {
@@ -76,6 +85,7 @@ body.login-body {
   transition: background-color 0.3s;
   width: 80%;
   justify-content: center;
+  box-sizing: border-box;
 }
 
 .btn-login:hover,
