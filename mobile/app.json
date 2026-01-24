@@ -14,13 +14,12 @@
     "android": {
       "package": "dev.tylerpac.momentum",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0b0f19"
       }
     },
     "plugins": ["expo-router"],
     "extra": {
-      "apiBaseUrl": "http://10.0.2.2:8080"
+      "apiBaseUrl": "http://192.168.1.26:8085"
     }
   }
 }

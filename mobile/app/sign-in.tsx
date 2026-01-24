@@ -21,7 +21,8 @@ export default function SignInScreen() {
       await saveAuthToken(result.accessToken);
       router.replace('/dashboard');
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Sign-in failed.';
+      console.error('Sign-in error:', err);
+      const message = err instanceof Error ? `${err.message}\n\n${err.stack ?? ''}` : `Sign-in failed: ${JSON.stringify(err)}`;
       Alert.alert('Sign-in failed', message);
     } finally {
       setIsSubmitting(false);
@@ -73,6 +74,7 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: 'center',
     gap: 12,
+    backgroundColor: '#0b0f19',
   },
   title: {
     fontSize: 32,
