@@ -1,19 +1,7 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven 3.9'
-    }
-
     stages {
-        stage('Build Spring Boot Backend') {
-            steps {
-                dir('backend') {
-                    sh 'mvn clean package -DskipTests'
-                }
-            }
-        }
-
         stage('Deploy with Docker Compose') {
             steps {
                 echo "🚀 Building and deploying Momentum (backend + frontend) via Docker Compose..."
