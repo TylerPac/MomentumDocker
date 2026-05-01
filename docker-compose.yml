@@ -16,7 +16,7 @@ services:
       - avatar_data:/data/avatars
     networks:
       - momentum_net
-      - overkill_net
+      - proxy
 
   frontend:
     build:
@@ -44,7 +44,5 @@ volumes:
 networks:
   momentum_net:
     name: momentum_net
-  overkill_net:
-    external: true
   proxy:
     external: true
