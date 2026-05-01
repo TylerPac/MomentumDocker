@@ -45,11 +45,30 @@ export default function HistoryScreen() {
       {state.isLoading ? <Text style={styles.body}>Loading…</Text> : null}
       {state.error ? <Text style={[styles.body, styles.error]}>{state.error}</Text> : null}
 
+
       {state.items?.length ? (
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Loaded</Text>
-          <Text style={styles.cardBody}>Workouts fetched: {state.items.length}</Text>
-          <Text style={styles.small}>Next: render rows + add edit/delete parity.</Text>
+          <Text style={styles.cardTitle}>Workouts</Text>
+          {state.items.map((item: any, idx: number) => (
+            <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.body}>{item.workoutName || 'Workout'} ({item.workoutType || ''})</Text>
+                <Text style={styles.small}>{item.workoutDate || ''}</Text>
+              </View>
+              <Pressable
+                style={{ marginLeft: 8, padding: 4 }}
+                onPress={() => Alert.alert('Edit', 'Edit workout coming soon!')}
+              >
+                <Text style={styles.link}>Edit</Text>
+              </Pressable>
+              <Pressable
+                style={{ marginLeft: 4, padding: 4 }}
+                onPress={() => Alert.alert('Delete', 'Delete workout coming soon!')}
+              >
+                <Text style={[styles.link, { color: 'red' }]}>Delete</Text>
+              </Pressable>
+            </View>
+          ))}
         </View>
       ) : null}
 

@@ -5,10 +5,6 @@ pipeline {
         maven 'Maven 3.9'
     }
 
-    parameters {
-        booleanParam(name: 'RESET_DB', defaultValue: false, description: 'Wipe and reinitialize the MySQL database')
-    }
-
     stages {
         stage('Build Spring Boot Backend') {
             steps {
@@ -20,25 +16,14 @@ pipeline {
 
         stage('Deploy with Docker Compose') {
             steps {
-                echo "🚀 Building and starting all services via Docker Compose..."
+                echo "🚀 Building and deploying Momentum (backend + frontend) via Docker Compose..."
                 withCredentials([
-                        string(credentialsId: 'MYSQL_ROOT_PASSWORD', variable: 'MYSQL_ROOT_PASSWORD'),
-                        string(credentialsId: 'MYSQL_DATABASE', variable: 'MYSQL_DATABASE'),
-                        string(credentialsId: 'MYSQL_USER', variable: 'MYSQL_USER'),
-                        string(credentialsId: 'MYSQL_PASSWORD', variable: 'MYSQL_PASSWORD'),
-                        string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET')
+                        string(credentialsId: 'MOMENTUM_DB_NAME', variable: 'MOMENTUM_DB_NAME'),
+                        string(credentialsId: 'MOMENTUM_DB_USER', variable: 'MOMENTUM_DB_USER'),
+                        string(credentialsId: 'MOMENTUM_DB_PASSWORD', variable: 'MOMENTUM_DB_PASSWORD'),
+                        string(credentialsId: 'MOMENTUM_JWT_SECRET', variable: 'MOMENTUM_JWT_SECRET')
                 ]) {
-                    script {
-                        if (params.RESET_DB) {
-                            echo '⚠️ Resetting MySQL volume...'
-                            sh 'docker compose down -v --remove-orphans || true'
-                        } else {
-                            sh 'docker compose down --remove-orphans || true'
-                        }
-                    }
-
-                    // Only mysql is pulled from a registry; backend/frontend are built from source.
-                    sh 'docker compose pull mysql || true'
+                    sh 'docker compose down --remove-orphans || true'
                     sh 'docker compose build --pull'
                     sh 'docker compose up -d'
                 }

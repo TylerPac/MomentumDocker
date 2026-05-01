@@ -3,6 +3,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { router } from 'expo-router';
 import { getDashboard } from '@/api/dashboard';
 import { clearAuthToken, loadAuthToken } from '@/storage/authToken';
+import DashboardChart from './DashboardChart';
 
 type DashboardState = {
   isLoading: boolean;
@@ -78,12 +79,27 @@ export default function DashboardScreen() {
       {state.isLoading ? <Text style={styles.body}>Loading…</Text> : null}
       {state.error ? <Text style={[styles.body, styles.error]}>{state.error}</Text> : null}
 
+
       {state.data ? (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Loaded</Text>
-          <Text style={styles.cardBody}>Dashboard data fetched successfully.</Text>
-          <Text style={styles.small}>Next: wire fields + charts to match the web.</Text>
-        </View>
+        <>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Summary</Text>
+            <Text style={styles.cardBody}>Total workouts: <Text style={{ fontWeight: 'bold' }}>{state.data.totalWorkouts ?? 0}</Text></Text>
+            <Text style={styles.cardBody}>Latest workout: <Text style={{ fontWeight: 'bold' }}>{state.data.latestWorkout?.workoutName || '—'}</Text></Text>
+          </View>
+          <DashboardChart
+            title="Graph 1"
+            labels={state.data.sortedDates || []}
+            values={state.data.graph1Values || []}
+            yLabel={state.data.workoutType === 'Cardio' ? 'Pace' : 'Weight'}
+          />
+          <DashboardChart
+            title="Graph 2"
+            labels={state.data.sortedDates || []}
+            values={state.data.graph2Values || []}
+            yLabel={state.data.workoutType === 'Cardio' ? 'Distance' : 'Volume'}
+          />
+        </>
       ) : null}
 
       <View style={styles.actions}>

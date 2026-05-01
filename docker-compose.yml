@@ -1,55 +1,50 @@
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: momentum-mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-momentum}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    ports:
-      - "3307:3306"  # Different port to avoid conflict with TylerPacDevelopment
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - backend
-
   backend:
     build:
       context: ./backend
-    image: momentum-backend
+    image: momentum-backend:latest
     container_name: momentum-backend
+    restart: unless-stopped
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-momentum}
-      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
+      # Connects to the shared overkill-mysql container on overkill_net
+      SPRING_DATASOURCE_URL: jdbc:mysql://overkill-mysql:3306/${MOMENTUM_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${MOMENTUM_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MOMENTUM_DB_PASSWORD}
+      JWT_SECRET: ${MOMENTUM_JWT_SECRET}
       MOMENTUM_AVATAR_DIR: /data/avatars
-    ports:
-      - "8085:8080"
-    depends_on:
-      - mysql
     volumes:
       - avatar_data:/data/avatars
     networks:
-      - backend
+      - momentum_net
+      - overkill_net
 
   frontend:
     build:
       context: ./frontend
-    image: momentum-frontend
+    image: momentum-frontend:latest
     container_name: momentum-frontend
-    ports:
-      - "8082:80"
+    restart: unless-stopped
     depends_on:
       - backend
     networks:
-      - backend
+      - momentum_net
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.momentum.rule=Host(\"momentum.tylerpac.dev\")"
+      - "traefik.http.routers.momentum.entrypoints=websecure"
+      - "traefik.http.routers.momentum.tls=true"
+      - "traefik.http.routers.momentum.tls.certresolver=myresolver"
+      - "traefik.http.services.momentum.loadbalancer.server.port=80"
 
 volumes:
-  mysql_data:
   avatar_data:
 
 networks:
-  backend:
+  momentum_net:
+    name: momentum_net
+  overkill_net:
+    external: true
+  proxy:
+    external: true

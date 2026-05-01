@@ -3,10 +3,10 @@
 # Build phase
 FROM node:22-alpine AS builder
 WORKDIR /app
-RUN npm install -g npm@latest
 
+# Use npm ci for reproducible installs; skip global npm upgrade (fails on alpine).
 COPY package.json package-lock.json ./
-RUN npm install --no-audit --no-fund
+RUN npm ci --no-audit --no-fund
 
 COPY . .
 RUN npm run build
