@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     environment:
       # Connects to the shared overkill-mysql container on overkill_net
-      SPRING_DATASOURCE_URL: jdbc:mysql://overkill-mysql:3306/${MOMENTUM_DB_NAME}
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MOMENTUM_DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${MOMENTUM_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${MOMENTUM_DB_PASSWORD}
       JWT_SECRET: ${MOMENTUM_JWT_SECRET}
