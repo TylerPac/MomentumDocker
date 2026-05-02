@@ -48,6 +48,9 @@ public class Workout {
     @Column(name = "reps")
     private Integer reps;
 
+    @Column(name = "notes", columnDefinition = "TEXT")
+    private String notes;
+
     public Workout() {}
 
     public Workout(Users user, String workoutType, String workoutName, Date workoutDate,
@@ -137,5 +140,13 @@ public class Workout {
 
     public void setReps(Integer reps) {
         this.reps = reps;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 }

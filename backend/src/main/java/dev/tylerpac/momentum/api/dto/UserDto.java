@@ -6,5 +6,6 @@ public record UserDto(
 	String email,
 	String firstName,
 	String lastName,
-	String avatarUrl
+	String avatarUrl,
+	String unitSystem
 ) {}

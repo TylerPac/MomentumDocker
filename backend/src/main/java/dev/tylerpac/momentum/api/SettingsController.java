@@ -23,6 +23,7 @@ import dev.tylerpac.momentum.api.dto.SettingsActionResponse;
 import dev.tylerpac.momentum.api.dto.SettingsPasswordUpdateRequest;
 import dev.tylerpac.momentum.api.dto.SettingsProfileUpdateRequest;
 import dev.tylerpac.momentum.api.dto.SettingsUpdateRequest;
+import dev.tylerpac.momentum.api.dto.SettingsPreferencesRequest;
 import dev.tylerpac.momentum.api.dto.SettingsUsernameUpdateRequest;
 import dev.tylerpac.momentum.api.dto.UserDto;
 import dev.tylerpac.momentum.model.Users;
@@ -207,6 +208,19 @@ public class SettingsController {
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         Users saved = usersRepository.save(user);
         return new SettingsActionResponse(true, "Password updated", null, userDtoMapper.toDto(saved), null);
+    }
+
+    @PostMapping("/preferences")
+    public SettingsActionResponse updatePreferences(@RequestBody SettingsPreferencesRequest req, Authentication authentication) {
+        Users user = requireUser(authentication);
+
+        String unitSystem = req != null && req.unitSystem() != null ? req.unitSystem().trim() : "metric";
+        if (!"metric".equals(unitSystem) && !"imperial".equals(unitSystem)) {
+            unitSystem = "metric";
+        }
+        user.setUnitSystem(unitSystem);
+        Users saved = usersRepository.save(user);
+        return new SettingsActionResponse(true, "Preferences updated", null, userDtoMapper.toDto(saved), null);
     }
 
     private Map<String, String> validateNewPassword(String newPassword) {

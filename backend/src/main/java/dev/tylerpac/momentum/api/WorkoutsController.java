@@ -2,7 +2,11 @@ package dev.tylerpac.momentum.api;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -35,18 +40,47 @@ public class WorkoutsController {
     }
 
     @GetMapping("/history")
-    public List<WorkoutDto> history(Authentication authentication) {
+    public Map<String, Object> history(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String workoutType,
+            @RequestParam(required = false) String dateFrom,
+            @RequestParam(required = false) String dateTo,
+            Authentication authentication
+    ) {
         Users user = requireUser(authentication);
-        return workoutRepository.findByUserOrderByWorkoutDateDesc(user)
-                .stream()
-                .map(WorkoutsController::toDto)
-                .toList();
+        int clampedSize = Math.min(Math.max(size, 1), 200);
+        PageRequest pageRequest = PageRequest.of(Math.max(page, 0), clampedSize, Sort.by(Sort.Direction.DESC, "workoutDate", "workoutId"));
+
+        java.sql.Date sqlFrom = (dateFrom != null && !dateFrom.isBlank()) ? parseDate(dateFrom) : null;
+        java.sql.Date sqlTo = (dateTo != null && !dateTo.isBlank()) ? parseDate(dateTo) : null;
+
+        Page<Workout> result = workoutRepository.findHistoryFiltered(user, search, workoutType, sqlFrom, sqlTo, pageRequest);
+
+        List<WorkoutDto> items = result.getContent().stream().map(WorkoutsController::toDto).toList();
+        return Map.of(
+                "items", items,
+                "page", result.getNumber(),
+                "pageSize", result.getSize(),
+                "totalItems", result.getTotalElements(),
+                "totalPages", result.getTotalPages()
+        );
     }
 
     @GetMapping("/names")
     public List<String> workoutNames(Authentication authentication) {
         Users user = requireUser(authentication);
         return workoutRepository.findDistinctWorkoutNamesByUser(user);
+    }
+
+    @GetMapping("/last")
+    public WorkoutDto lastByName(@RequestParam String name, Authentication authentication) {
+        Users user = requireUser(authentication);
+        return workoutRepository
+                .findFirstByUserAndWorkoutNameOrderByWorkoutDateDescWorkoutIdDesc(user, name)
+                .map(WorkoutsController::toDto)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No previous workout found"));
     }
 
     @GetMapping("/{id}")
@@ -60,6 +94,24 @@ public class WorkoutsController {
         }
 
         return toDto(workout);
+    }
+
+    @PostMapping("/batch")
+    public List<WorkoutDto> createBatch(@RequestBody List<WorkoutUpsertRequest> reqs, Authentication authentication) {
+        Users user = requireUser(authentication);
+        if (reqs == null || reqs.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No workouts provided");
+        }
+        if (reqs.size() > 20) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Too many workouts in one submission (max 20)");
+        }
+        List<Workout> saved = reqs.stream().map(req -> {
+            Workout w = new Workout();
+            w.setUser(user);
+            applyRequest(w, req);
+            return workoutRepository.save(w);
+        }).toList();
+        return saved.stream().map(WorkoutsController::toDto).toList();
     }
 
     @PostMapping
@@ -123,6 +175,7 @@ public class WorkoutsController {
         workout.setWeight(req.weight());
         workout.setSets(req.sets());
         workout.setReps(req.reps());
+        workout.setNotes(req.notes());
     }
 
     private static WorkoutDto toDto(Workout w) {
@@ -136,7 +189,17 @@ public class WorkoutsController {
                 w.getTime(),
                 w.getWeight(),
                 w.getSets(),
-                w.getReps()
+                w.getReps(),
+                w.getNotes()
         );
     }
+
+    private static java.sql.Date parseDate(String s) {
+        try {
+            return java.sql.Date.valueOf(s);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
 }
+

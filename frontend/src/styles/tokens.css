@@ -1,5 +1,6 @@
-:root {
-  /* Theme tokens (default theme) */
+:root,
+[data-theme="dark"] {
+  /* Theme tokens (dark theme — default) */
   --color-bg-0: #0f1b2b;
   --color-bg-1: #142236;
   --color-surface: #1f2a38;
@@ -8,7 +9,7 @@
 
   --color-text: #ffffff;
   --color-placeholder: #cccccc;
-  --color-error: red;
+  --color-error: #ff6b6b;
   --color-success: #36d399;
 
   --color-accent: #00bfa6;
@@ -16,9 +17,33 @@
 
   --color-border: rgba(255, 255, 255, 0.12);
 
+  --color-input-bg: #ffffff;
+  --color-input-text: #0f1b2b;
+
   --radius-lg: 12px;
   --radius-md: 8px;
   --radius-pill: 25px;
 
   --font-body: 'Nunito Sans', sans-serif;
+}
+
+[data-theme="light"] {
+  --color-bg-0: #f0f4f8;
+  --color-bg-1: #e8eef5;
+  --color-surface: #ffffff;
+  --color-surface-2: #dce6f0;
+  --color-surface-hover: #c8d8ea;
+
+  --color-text: #0f1b2b;
+  --color-placeholder: #556070;
+  --color-error: #d32f2f;
+  --color-success: #1a7a55;
+
+  --color-accent: #00897b;
+  --color-accent-hover: #00695c;
+
+  --color-border: rgba(0, 0, 0, 0.12);
+
+  --color-input-bg: #ffffff;
+  --color-input-text: #0f1b2b;
 }

@@ -15,7 +15,8 @@ public class UserDtoMapper {
         user.getEmail(),
         user.getFirstName(),
         user.getLastName(),
-        avatarUrl(user)
+        avatarUrl(user),
+        user.getUnitSystem() != null ? user.getUnitSystem() : "metric"
     );
     }
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { apiFetch, setAccessToken } from '../api';
 import { useAuth } from '../auth';
 import { usePageMeta } from '../utils/pageMeta';
+import { useToast } from '../utils/toast';
 
 function getFieldErrors(err) {
   const data = err?.data;
@@ -23,6 +24,7 @@ const USERNAME_PATTERN = /^[A-Za-z0-9_]{3,20}$/;
 
 export default function Settings() {
   const { user, setUser } = useAuth();
+  const toast = useToast();
 
   usePageMeta({ title: 'Momentum — Settings', description: 'Update your Momentum account settings.' });
 
@@ -62,6 +64,34 @@ export default function Settings() {
   const [securityError, setSecurityError] = React.useState('');
   const [securitySuccess, setSecuritySuccess] = React.useState('');
   const [securityFieldErrors, setSecurityFieldErrors] = React.useState(null);
+
+  // Preferences (unit system)
+  const [unitSystem, setUnitSystem] = React.useState(() => user?.unitSystem || 'metric');
+  const [prefSaving, setPrefSaving] = React.useState(false);
+
+  React.useEffect(() => {
+    setUnitSystem(user?.unitSystem || 'metric');
+  }, [user?.unitSystem]);
+
+  async function onUnitChange(next) {
+    if (next === unitSystem || prefSaving) return;
+    setUnitSystem(next);
+    setPrefSaving(true);
+    try {
+      const resp = await apiFetch('/settings/preferences', {
+        method: 'POST',
+        body: JSON.stringify({ unitSystem: next }),
+      });
+      const updatedUser = resp?.user || null;
+      if (updatedUser) setUser(updatedUser);
+      toast('Preferences saved', 'success');
+    } catch (err) {
+      toast(err?.message || 'Failed to save preferences', 'error');
+      setUnitSystem(user?.unitSystem || 'metric');
+    } finally {
+      setPrefSaving(false);
+    }
+  }
 
   React.useEffect(() => {
     setAvatarPreview(user?.avatarUrl || null);
@@ -538,6 +568,25 @@ export default function Settings() {
               </div>
             </form>
           )}
+        </div>
+        {/* Preferences */}
+        <div className="settings-card" style={{ marginTop: 12 }}>
+          <div className="settings-card__title">Preferences</div>
+          <div className="settings-help" style={{ marginTop: 6 }}>Units used across the app for weight and distance</div>
+          <div className="unit-toggle" style={{ marginTop: 10 }}>
+            <button
+              type="button"
+              className={`unit-btn${unitSystem === 'metric' ? ' unit-btn--active' : ''}`}
+              onClick={() => onUnitChange('metric')}
+              disabled={prefSaving}
+            >Metric (kg / km)</button>
+            <button
+              type="button"
+              className={`unit-btn${unitSystem === 'imperial' ? ' unit-btn--active' : ''}`}
+              onClick={() => onUnitChange('imperial')}
+              disabled={prefSaving}
+            >Imperial (lbs / mi)</button>
+          </div>
         </div>
       </div>
     </div>

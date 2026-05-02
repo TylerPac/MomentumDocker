@@ -9,5 +9,6 @@ public record WorkoutDto(
         Float time,
         Float weight,
         Integer sets,
-        Integer reps
+        Integer reps,
+        String notes
 ) {}

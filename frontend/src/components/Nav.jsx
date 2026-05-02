@@ -2,11 +2,13 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { clearAccessToken } from '../api';
 import { useAuth } from '../auth';
+import { useTheme } from '../utils/theme';
 
 export default function Nav() {
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const { theme, toggle: toggleTheme } = useTheme();
 
   React.useEffect(() => {
     if (!user) return undefined;
@@ -69,6 +71,10 @@ export default function Nav() {
       <div className="logout-form-container">
         <button type="button" className="logout-btn" onClick={onLogout}>Logout</button>
       </div>
+
+      <button type="button" className="theme-toggle" onClick={toggleTheme} title="Toggle theme">
+        {theme === 'dark' ? '☀️' : '🌙'}
+      </button>
 
       <div className={mobileOpen ? 'mobile-menu mobile-menu--open' : 'mobile-menu'} aria-hidden={!mobileOpen}>
         <div className="mobile-menu__content" role="dialog" aria-label="Menu">

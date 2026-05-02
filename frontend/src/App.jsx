@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './auth';
 import Nav from './components/Nav';
 import UserBadge from './components/UserBadge';
+import { ToastProvider } from './utils/toast';
 
 const SignIn = React.lazy(() => import('./pages/SignIn'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
@@ -36,7 +37,8 @@ function Layout({ children }) {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter>
         <Layout>
           <React.Suspense fallback={<div style={{ padding: 16 }}>Loading…</div>}>
             <Routes>
@@ -86,6 +88,7 @@ export default function App() {
           </React.Suspense>
         </Layout>
       </BrowserRouter>
+      </ToastProvider>
     </AuthProvider>
   );
 }

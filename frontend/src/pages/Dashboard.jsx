@@ -14,6 +14,7 @@ export default function Dashboard() {
   const [data, setData] = React.useState(null);
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(true);
+  const [dateRange, setDateRange] = React.useState('all');
 
   usePageMeta({ title: 'Momentum — Dashboard', description: 'Momentum dashboard and workout charts.' });
 
@@ -32,7 +33,8 @@ export default function Dashboard() {
     const controller = new AbortController();
     abortRef.current = controller;
     try {
-      const qs = params ? `?${new URLSearchParams(params).toString()}` : '';
+      const allParams = { dateRange, ...params };
+      const qs = `?${new URLSearchParams(allParams).toString()}`;
       const resp = await apiFetch(`/dashboard${qs}`, { signal: controller.signal });
       setData(resp);
     } catch (err) {
@@ -46,7 +48,8 @@ export default function Dashboard() {
   React.useEffect(() => {
     load();
     return () => abortRef.current?.abort?.();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateRange]);
 
   function onTypeChange(nextType) {
     const names = workoutMap?.[nextType] || [];
@@ -74,6 +77,17 @@ export default function Dashboard() {
       {error ? <div className="error-message">{error}</div> : null}
 
       <div className="dashboard-controls">
+        <div className="date-range-toggle">
+          {[['30', '30 days'], ['90', '90 days'], ['all', 'All time']].map(([val, label]) => (
+            <button
+              key={val}
+              type="button"
+              className={`date-range-btn${dateRange === val ? ' date-range-btn--active' : ''}`}
+              onClick={() => setDateRange(val)}
+              disabled={loading}
+            >{label}</button>
+          ))}
+        </div>
         <label>
           Workout Type
           <select value={workoutType} onChange={(e) => onTypeChange(e.target.value)} disabled={!data || loading}>

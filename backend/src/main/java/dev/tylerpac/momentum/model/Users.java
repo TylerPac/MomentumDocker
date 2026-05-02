@@ -41,6 +41,9 @@ public class Users {
     @Column(name = "avatar_updated_at")
     private Instant avatarUpdatedAt;
 
+    @Column(name = "unit_system", nullable = false)
+    private String unitSystem = "metric";
+
     public Users() {}
 
     public Users(String username, String plainPassword) {
@@ -102,6 +105,14 @@ public class Users {
 
     public void setAvatarUpdatedAt(Instant avatarUpdatedAt) {
         this.avatarUpdatedAt = avatarUpdatedAt;
+    }
+
+    public String getUnitSystem() {
+        return unitSystem;
+    }
+
+    public void setUnitSystem(String unitSystem) {
+        this.unitSystem = unitSystem != null ? unitSystem : "metric";
     }
 
     public void setPasswordHash(String passwordHash) {

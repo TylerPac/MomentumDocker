@@ -1,5 +1,7 @@
 package dev.tylerpac.momentum.api;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,6 +39,7 @@ public class DashboardController {
     public DashboardResponse dashboard(
             @RequestParam(required = false) String workoutType,
             @RequestParam(required = false) String workoutName,
+            @RequestParam(required = false, defaultValue = "all") String dateRange,
             Authentication authentication
     ) {
         Users user = requireUser(authentication);
@@ -62,6 +65,15 @@ public class DashboardController {
                     resolvedType,
                     resolvedName
             );
+        }
+
+        // Apply date range filter
+        Date cutoff = resolveCutoff(dateRange);
+        if (cutoff != null) {
+            final Date finalCutoff = cutoff;
+            relevantWorkouts = relevantWorkouts.stream()
+                    .filter(w -> w.getWorkoutDate() != null && !w.getWorkoutDate().before(finalCutoff))
+                    .toList();
         }
 
         List<WorkoutDto> workoutDetails = new ArrayList<>();
@@ -112,6 +124,21 @@ public class DashboardController {
         );
     }
 
+    private static Date resolveCutoff(String dateRange) {
+        if (dateRange == null || dateRange.isBlank() || "all".equalsIgnoreCase(dateRange)) {
+            return null;
+        }
+        try {
+            int days = Integer.parseInt(dateRange);
+            if (days > 0) {
+                return Date.valueOf(LocalDate.now().minusDays(days));
+            }
+        } catch (NumberFormatException ignored) {
+            // fall through to null
+        }
+        return null;
+    }
+
     private Map<String, List<String>> buildWorkoutMap(Users user) {
         List<Object[]> pairs = workoutRepository.findDistinctTypeNamePairsByUser(user);
         Map<String, List<String>> map = new HashMap<>();
@@ -146,7 +173,9 @@ public class DashboardController {
                 w.getTime(),
                 w.getWeight(),
                 w.getSets(),
-                w.getReps()
+                w.getReps(),
+                w.getNotes()
         );
     }
 }
+

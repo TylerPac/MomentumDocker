@@ -8,5 +8,6 @@ public record WorkoutUpsertRequest(
         Float time,
         Float weight,
         Integer sets,
-        Integer reps
+        Integer reps,
+        String notes
 ) {}

@@ -18,6 +18,7 @@ public class RestExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(RestExceptionHandler.class);
 
+    @SuppressWarnings({"null"})
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ApiFieldError> handleValidationException(ValidationException ex) {
         HttpStatus status = ex.getStatus() != null ? ex.getStatus() : HttpStatus.BAD_REQUEST;
