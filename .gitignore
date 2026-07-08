@@ -35,6 +35,8 @@ build/
 # Local env files
 .env
 .env.*
+dev.env
+**/dev.env
 
 # Codacy CLI artifacts
 .codacy/
