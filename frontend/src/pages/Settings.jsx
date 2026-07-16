@@ -100,7 +100,13 @@ export default function Settings() {
 
     setDeleteSaving(true);
     try {
-      await apiFetch('/settings/account', { method: 'DELETE' });
+      try {
+        await apiFetch('/settings/account', { method: 'DELETE' });
+      } catch (err) {
+        if (err?.status !== 403) throw err;
+        // Some deployments block DELETE at the proxy layer; fall back to POST.
+        await apiFetch('/settings/account/delete', { method: 'POST' });
+      }
       clearAccessToken();
       setUser(null);
       navigate('/', { replace: true });

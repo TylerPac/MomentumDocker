@@ -141,8 +141,16 @@ public class SettingsController {
 
         workoutRepository.deleteByUser(user);
         usersRepository.delete(user);
+        usersRepository.flush();
 
         return new SettingsActionResponse(true, "Account deleted", null, null, null);
+    }
+
+    // Fallback for environments where proxies/WAFs block HTTP DELETE.
+    @PostMapping("/account/delete")
+    @Transactional
+    public SettingsActionResponse deleteAccountPost(Authentication authentication) {
+        return deleteAccount(authentication);
     }
 
     private Users requireUser(Authentication authentication) {

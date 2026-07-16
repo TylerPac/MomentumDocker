@@ -22,6 +22,9 @@ public class Users {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "unit_system", nullable = false)
+    private String unitSystem = "imperial";
+
     public Users() {}
 
     public int getUserId() {
@@ -42,5 +45,13 @@ public class Users {
 
     public void setPasswordHash(String passwordHash) {
         this.password = passwordHash;
+    }
+
+    public String getUnitSystem() {
+        return unitSystem;
+    }
+
+    public void setUnitSystem(String unitSystem) {
+        this.unitSystem = unitSystem;
     }
 }

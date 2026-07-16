@@ -1,8 +1,11 @@
 package dev.tylerpac.momentum.controller;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,6 +32,8 @@ import dev.tylerpac.momentum.validation.ValidationRules;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
+    private static final String DEFAULT_UNIT_SYSTEM = "imperial";
 
     private final UsersRepository usersRepository;
     private final AuthenticationManager authenticationManager;
@@ -98,14 +103,26 @@ public class AuthController {
             throw new ValidationException(HttpStatus.BAD_REQUEST, "Please fix the highlighted fields", Map.copyOf(fieldErrors));
         }
 
-        if (usersRepository.existsByUsername(username)) {
-            throw new ValidationException(HttpStatus.CONFLICT, "Username already exists", Map.of("username", "Username already taken"));
-        }
+        Users saved;
+        try {
+            if (usersRepository.existsByUsername(username)) {
+                throw new ValidationException(HttpStatus.CONFLICT, "Username already exists", Map.of("username", "Username already taken"));
+            }
 
-        Users user = new Users();
-        user.setUsername(username);
-        user.setPasswordHash(passwordEncoder.encode(password));
-        Users saved = usersRepository.save(user);
+            Users user = new Users();
+            user.setUsername(username);
+            user.setPasswordHash(passwordEncoder.encode(password));
+            user.setUnitSystem(DEFAULT_UNIT_SYSTEM);
+            // Guard against DB collation/constraint rules that can still reject duplicates.
+            saved = usersRepository.save(user);
+        } catch (DataIntegrityViolationException ex) {
+            throw new ValidationException(HttpStatus.CONFLICT, "Username already exists", Map.of("username", "Username already taken"));
+        } catch (DataAccessException ex) {
+            if (looksLikeDuplicateUsername(ex)) {
+                throw new ValidationException(HttpStatus.CONFLICT, "Username already exists", Map.of("username", "Username already taken"));
+            }
+            throw ex;
+        }
 
         String token = jwtService.generateToken(saved.getUsername());
         return new AuthTokenResponse(
@@ -114,6 +131,21 @@ public class AuthController {
             jwtService.getExpirationSeconds(),
             userDtoMapper.toDto(saved)
         );
+    }
+
+    private static boolean looksLikeDuplicateUsername(Throwable ex) {
+        Throwable t = ex;
+        while (t != null) {
+            String msg = t.getMessage();
+            if (msg != null) {
+                String s = msg.toLowerCase(Locale.ROOT);
+                if ((s.contains("duplicate") && s.contains("username")) || s.contains("users.username")) {
+                    return true;
+                }
+            }
+            t = t.getCause();
+        }
+        return false;
     }
 
     @PostMapping("/logout")
