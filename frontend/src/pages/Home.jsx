@@ -111,7 +111,7 @@ export default function Home() {
         </section>
 
         <section className="home-final-cta" aria-label="Call to action">
-          <Link className="home-cta home-cta--primary" to={user ? '/dashboard' : '/signin'}>
+          <Link className="home-cta home-cta--primary" to={user ? '/dashboard' : '/signin?mode=create'}>
             {user ? 'Continue Training' : 'Create Your Account'}
           </Link>
         </section>

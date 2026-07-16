@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { apiFetch, setAccessToken } from '../api';
 import { useAuth } from '../auth';
 import { usePageMeta } from '../utils/pageMeta';
@@ -15,6 +15,7 @@ function passwordChecklist(password) {
 
 export default function SignIn() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, loading, refresh, setUser } = useAuth();
   const [mode, setMode] = React.useState('signin');
   const [username, setUsername] = React.useState('');
@@ -38,6 +39,11 @@ export default function SignIn() {
   React.useEffect(() => {
     if (!loading && user) navigate('/dashboard', { replace: true });
   }, [loading, user, navigate]);
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(location.search || '');
+    setMode(params.get('mode') === 'create' ? 'create' : 'signin');
+  }, [location.search]);
 
   async function onSubmit(e) {
     e.preventDefault();
