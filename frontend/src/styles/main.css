@@ -5,6 +5,10 @@ body {
   height: 100%;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
 }
@@ -19,7 +23,9 @@ body {
 }
 
 body.login-body {
-  background: linear-gradient(var(--color-bg-0), var(--color-bg-1)); /* Smooth dark blue gradient */
+  background:
+    radial-gradient(820px 320px at 12% -8%, rgba(56, 189, 248, 0.12), transparent 58%),
+    linear-gradient(160deg, var(--color-bg-0), var(--color-bg-1));
   min-height: 100vh;
   min-height: 100dvh;
   margin: 0;
@@ -53,9 +59,27 @@ body.login-body #root {
 }
 
 .logo {
-  width: min(420px, 80vw);
+  width: min(260px, 60vw);
   display: block;
   margin: 0 auto 14px;
+}
+
+.signin-logo-link {
+  width: auto;
+  height: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+}
+
+.signin-logo {
+  width: 500px;
+  height: auto;
+  transform: translateX(10px);
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.26));
 }
 
 .logo-name {
@@ -68,9 +92,9 @@ body.login-body #root {
   width: 100%;
   padding: 12px;
   margin: 10px 0;
-  border: none;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-pill);
-  background-color: var(--color-surface-2);
+  background-color: var(--color-input-bg);
   color: var(--color-text);
   font-size: 16px;
   text-align: center;
@@ -112,14 +136,14 @@ body.login-body #root {
 .btn-login,
 .btn-create {
   background-color: var(--color-accent);
-  border: none;
-  color: var(--color-text);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #151515;
   padding: 12px;
   margin: 8px 0;
   border-radius: var(--radius-pill);
   font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.2s ease, box-shadow 0.2s ease;
   width: 80%;
   justify-content: center;
   box-sizing: border-box;
@@ -128,6 +152,8 @@ body.login-body #root {
 .btn-login:hover,
 .btn-create:hover {
   background-color: var(--color-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28);
 }
 
 body.dashboard-body {
@@ -181,10 +207,10 @@ body.dashboard-body #root {
 }
 
 .settings-card {
-  background-color: var(--color-surface);
+  background: linear-gradient(180deg, rgba(24, 24, 24, 0.96), rgba(16, 16, 16, 0.94));
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 14px;
+  border-radius: 16px;
+  padding: 16px;
 }
 
 .settings-card__title {
@@ -250,7 +276,7 @@ body.dashboard-body #root {
 .btn-danger {
   margin-top: 12px;
   background-color: var(--color-error);
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   color: #fff;
   padding: 12px;
   border-radius: var(--radius-md);
@@ -292,32 +318,36 @@ body.dashboard-body label {
 
 .btn-primary {
   background-color: var(--color-accent);
-  border: none;
-  color: var(--color-text);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #091018;
   padding: 12px;
   border-radius: var(--radius-md);
   font-size: 1rem;
   cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
 }
 
 .btn-primary:hover {
   background-color: var(--color-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28);
 }
 
 /* Sidebar */
 .sidebar {
-  background-color: var(--color-surface);
+  background: linear-gradient(180deg, rgba(17, 21, 27, 0.98), rgba(10, 12, 16, 0.98));
   width: 220px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding: 16px;
+  padding: 18px 14px;
   gap: 14px;
   box-sizing: border-box;
   height: 100vh;
   position: sticky;
   top: 0;
   align-self: flex-start;
+  border-right: 1px solid var(--color-border);
 }
 
 .sidebar-header {
@@ -341,7 +371,7 @@ body.dashboard-body label {
 }
 
 .sidebar-logo-img {
-  width: 110px;
+  width: 20px;
   height: auto;
   display: block;
 }
@@ -362,7 +392,7 @@ body.dashboard-body label {
   height: 40px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-2);
   cursor: pointer;
 }
 
@@ -546,10 +576,15 @@ body.dashboard-body label {
   text-align: left;
   padding: 10px 12px;
   border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  transition: border-color 150ms ease, background-color 150ms ease;
 }
 
 .sidebar-nav a.is-active {
-  background-color: var(--color-accent);
+  background: linear-gradient(180deg, rgba(22, 32, 43, 0.9), rgba(17, 27, 37, 0.9));
+  border-color: rgba(56, 189, 248, 0.35);
+  box-shadow: inset 3px 0 0 0 var(--color-accent), 0 8px 22px rgba(56, 189, 248, 0.12);
+  color: #eaf6ff;
 }
 
 .action-buttons {
@@ -562,13 +597,13 @@ body.dashboard-body label {
 .delete-btn,
 .logout-btn {
   background-color: var(--color-accent);
-  border: none;
-  color: var(--color-text);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #111;
   padding: 8px 14px;
   border-radius: var(--radius-md);
   font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 180ms ease;
   width: auto; /* Don't stretch */
   text-align: center;
 }
@@ -582,7 +617,7 @@ body.dashboard-body label {
 
 .sidebar-nav a:hover,
 .logout-btn:hover {
-  background-color: var(--color-accent);
+  background-color: var(--color-surface-hover);
 }
 
 .logout-form-container {
@@ -611,7 +646,7 @@ body.dashboard-body label {
   padding: 10px 12px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: linear-gradient(180deg, rgba(46, 59, 78, 0.75), rgba(31, 42, 56, 0.92));
+  background: linear-gradient(180deg, rgba(25, 25, 25, 0.92), rgba(14, 14, 14, 0.92));
 }
 
 .sidebar-profile__label {
@@ -633,11 +668,13 @@ body.dashboard-body label {
 .main-content {
   flex: 1;
   min-height: 100vh;
-  padding: 20px;
-  background-color: var(--color-bg-1);
+  padding: 24px;
+  background:
+    radial-gradient(900px 360px at 8% -5%, rgba(56, 189, 248, 0.09), transparent 60%),
+    linear-gradient(170deg, #0d1117 6%, #10151d 70%, #111722 100%);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   overflow-y: auto;
 }
 
@@ -728,6 +765,35 @@ body.dashboard-body label {
   color: var(--color-text);
 }
 
+.dashboard-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-left: 12px;
+}
+
+.dashboard-kpi-card {
+  background: linear-gradient(180deg, rgba(21, 26, 33, 0.96), rgba(17, 23, 30, 0.94));
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.dashboard-kpi-card__label {
+  color: var(--color-placeholder);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.dashboard-kpi-card__value {
+  color: var(--color-accent);
+  font-size: 1.02rem;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
 .dashboard-charts {
   display: grid;
   grid-template-columns: 1fr;
@@ -735,10 +801,11 @@ body.dashboard-body label {
 }
 
 .chart-card {
-  background-color: var(--color-surface);
+  background: linear-gradient(180deg, rgba(21, 26, 33, 0.96), rgba(16, 21, 28, 0.95));
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: 16px;
   padding: 14px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
 }
 
 .chart-card__header {
@@ -840,7 +907,7 @@ body.dashboard-body label {
   stroke: var(--color-border);
   stroke-width: 1;
   stroke-dasharray: 4 4;
-  opacity: 0.7;
+  opacity: 0.45;
 }
 
 .chart-series {
@@ -877,11 +944,12 @@ body.dashboard-body label {
   position: absolute;
   transform: translate(-50%, -115%);
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(56, 189, 248, 0.3);
   border-radius: var(--radius-md);
   padding: 8px 10px;
   min-width: 110px;
   pointer-events: none;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
 }
 
 .chart-wrap--recharts .chart-tooltip {
@@ -902,16 +970,26 @@ body.dashboard-body label {
 }
 
 .Workout-History-Table {
-  background-color: var(--color-surface);
+  background-color: rgba(22, 22, 22, 0.92);
   margin-top: 20px;
   padding: 20px;
-  border-radius: var(--radius-lg);
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
 }
 
 table tr td,
 table tr th {
   padding: 10px;
   text-align: left;
+  border-bottom: 1px solid rgba(37, 44, 54, 0.7);
+}
+
+.dashboard-table thead th {
+  color: #c7d3e2;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
 }
 
 table tr:nth-child(even) {
@@ -928,7 +1006,36 @@ table {
 }
 
 table tr:hover {
-  background-color: var(--color-surface-hover);
+  background: linear-gradient(90deg, rgba(28, 42, 56, 0.7), rgba(24, 37, 49, 0.7));
+}
+
+.dashboard-section-title {
+  margin: 6px 0 2px;
+  letter-spacing: -0.01em;
+}
+
+.workout-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  border: 1px solid var(--color-border);
+  background-color: rgba(21, 26, 33, 0.9);
+}
+
+.workout-type-badge--cardio {
+  color: #d2f6ff;
+  border-color: rgba(56, 189, 248, 0.45);
+  background-color: rgba(29, 78, 111, 0.22);
+}
+
+.workout-type-badge--weightlifting,
+.workout-type-badge--strength {
+  color: #d4fef4;
+  border-color: rgba(45, 212, 191, 0.45);
+  background-color: rgba(17, 94, 89, 0.22);
 }
 
 .chart-placeholder {
@@ -1034,6 +1141,12 @@ label.visually-hidden {
   .dashboard-summary {
     grid-column: 1 / -1;
     margin-left: 0;
+  }
+
+  .dashboard-kpi-grid {
+    grid-column: 1 / -1;
+    margin-left: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1305,7 +1418,7 @@ label.visually-hidden {
 .date-range-btn {
   background: none;
   border: 1px solid var(--color-border);
-  color: var(--color-placeholder);
+  color: #bdd8e8;
   border-radius: var(--radius-md);
   padding: 6px 12px;
   cursor: pointer;
@@ -1317,9 +1430,10 @@ label.visually-hidden {
 }
 
 .date-range-btn--active {
-  background-color: var(--color-accent);
-  border-color: var(--color-accent);
-  color: var(--color-text);
+  background-color: rgba(56, 189, 248, 0.18);
+  border-color: rgba(56, 189, 248, 0.55);
+  color: #eaf7ff;
+  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.24);
 }
 
 .date-range-btn:hover:not(.date-range-btn--active) {

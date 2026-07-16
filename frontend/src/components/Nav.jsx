@@ -47,7 +47,7 @@ export default function Nav() {
     <nav className="sidebar" aria-label="Primary">
       <div className="sidebar-header">
         <Link className="sidebar-logo-link" to="/" aria-label="Go to home page">
-          <img className="sidebar-logo-img" src="/logo512.png" alt="Momentum logo" />
+          <img className="sidebar-logo-img" src="/MomentumLogo.png" alt="Momentum logo" />
         </Link>
 
         <button

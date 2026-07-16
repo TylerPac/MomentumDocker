@@ -1,27 +1,29 @@
 :root {
-  --color-bg-0: #0b1e33;
-  --color-bg-1: #102945;
-  --color-surface: #172b42;
-  --color-surface-2: #253c58;
-  --color-surface-hover: #2e4868;
+  --color-bg-0: #0a0c10;
+  --color-bg-1: #11151b;
+  --color-surface: #151a21;
+  --color-surface-2: #1b222c;
+  --color-surface-hover: #232d3a;
 
-  --color-text: #eef6ff;
-  --color-placeholder: #a8bfd6;
-  --color-error: #ff6b6b;
-  --color-success: #3fd4a3;
+  --color-text: #f8fafc;
+  --color-placeholder: #94a3b8;
+  --color-error: #ff7272;
+  --color-success: #22c55e;
 
-  --color-accent: #1cc7b5;
-  --color-accent-hover: #16a99a;
-  --color-home-header-bg: rgba(9, 22, 39, 0.86);
+  --color-accent: #38bdf8;
+  --color-accent-hover: #22d3ee;
+  --color-accent-2: #2dd4bf;
+  --color-accent-3: #f97316;
+  --color-home-header-bg: rgba(10, 12, 16, 0.84);
 
-  --color-border: rgba(147, 183, 216, 0.24);
+  --color-border: #252c36;
 
-  --color-input-bg: #f2f7fd;
-  --color-input-text: #11263f;
+  --color-input-bg: #0f1319;
+  --color-input-text: #f8fafc;
 
   --radius-lg: 12px;
   --radius-md: 8px;
   --radius-pill: 25px;
 
-  --font-body: 'Nunito Sans', sans-serif;
+  --font-body: 'Space Grotesk', 'Manrope', 'Nunito Sans', sans-serif;
 }

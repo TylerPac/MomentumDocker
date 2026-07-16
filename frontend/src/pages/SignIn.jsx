@@ -80,8 +80,8 @@ export default function SignIn() {
   return (
     <div className="signin-page">
       <div className="signin-content">
-        <Link className="home-logo-link" to="/" aria-label="Go to home page">
-          <img className="logo" src="/MomentumLogo.png" alt="Momentum logo" />
+        <Link className="signin-logo-link" to="/" aria-label="Go to home page">
+          <img className="signin-logo" src="/MomentumLogo.png" alt="Momentum logo" />
         </Link>
         <form onSubmit={onSubmit} className="login-form" style={{ width: 'min(420px, 90vw)' }}>
         {mode === 'create' ? (

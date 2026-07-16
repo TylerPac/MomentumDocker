@@ -94,7 +94,7 @@ function ChartTooltip({ active, payload, label }) {
   );
 }
 
-export default function LineChart({ title, labels, values, yLabel, yAxisLabel, yTickMin, yTickStep }) {
+export default function LineChart({ title, labels, values, yLabel, yAxisLabel, yTickMin, yTickStep, accentVar = '--color-accent' }) {
   const chartData = React.useMemo(() => {
     return (labels || []).map((label, i) => ({
       label: String(label || ''),
@@ -105,6 +105,7 @@ export default function LineChart({ title, labels, values, yLabel, yAxisLabel, y
 
   const yScale = React.useMemo(() => buildYScale(values, yTickMin, yTickStep), [values, yTickMin, yTickStep]);
   const gradientId = `chart-gradient-${React.useId().replace(/:/g, '')}`;
+  const accentColor = `var(${accentVar})`;
 
   return (
     <div className="chart-card">
@@ -121,8 +122,8 @@ export default function LineChart({ title, labels, values, yLabel, yAxisLabel, y
             <AreaChart data={chartData} margin={{ top: 16, right: 20, bottom: 20, left: 16 }}>
               <defs>
                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--color-accent)" stopOpacity={0.28} />
-                  <stop offset="100%" stopColor="var(--color-accent)" stopOpacity={0.02} />
+                  <stop offset="0%" stopColor={accentColor} stopOpacity={0.35} />
+                  <stop offset="100%" stopColor={accentColor} stopOpacity={0.03} />
                 </linearGradient>
               </defs>
 
@@ -158,11 +159,11 @@ export default function LineChart({ title, labels, values, yLabel, yAxisLabel, y
               <Area
                 type="monotone"
                 dataKey="value"
-                stroke="var(--color-accent)"
-                strokeWidth={2.5}
+                stroke={accentColor}
+                strokeWidth={3}
                 fill={`url(#${gradientId})`}
-                dot={{ r: 3, strokeWidth: 0, fill: 'var(--color-accent)' }}
-                activeDot={{ r: 4.5, stroke: 'var(--color-bg-1)', strokeWidth: 1, fill: 'var(--color-accent)' }}
+                dot={{ r: 3, strokeWidth: 0, fill: accentColor }}
+                activeDot={{ r: 5, stroke: 'var(--color-bg-1)', strokeWidth: 1.5, fill: accentColor }}
               />
             </AreaChart>
           </ResponsiveContainer>

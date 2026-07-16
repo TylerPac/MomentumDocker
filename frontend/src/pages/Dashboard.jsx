@@ -68,6 +68,9 @@ export default function Dashboard() {
   const graph1Title = isCardio ? 'Pace' : 'Weight';
   const graph2Title = isCardio ? 'Distance per run' : 'Volume';
 
+  const graph1AccentVar = isCardio ? '--color-accent' : '--color-accent-2';
+  const graph2AccentVar = isCardio ? '--color-accent-2' : '--color-accent-3';
+
   const graph1AxisLabel = isCardio ? 'Pace' : 'Weight';
   const graph2AxisLabel = isCardio ? 'Distance' : 'Volume';
 
@@ -108,9 +111,23 @@ export default function Dashboard() {
           </select>
         </label>
 
-        <div className="dashboard-summary">
-          <div>Total workouts: <strong>{data?.totalWorkouts ?? 0}</strong></div>
-          <div>Latest workout: <strong>{data?.latestWorkout?.workoutName || '—'}</strong></div>
+        <div className="dashboard-summary dashboard-kpi-grid">
+          <div className="dashboard-kpi-card">
+            <div className="dashboard-kpi-card__label">Total workouts</div>
+            <div className="dashboard-kpi-card__value">{data?.totalWorkouts ?? 0}</div>
+          </div>
+          <div className="dashboard-kpi-card">
+            <div className="dashboard-kpi-card__label">Latest workout</div>
+            <div className="dashboard-kpi-card__value">{data?.latestWorkout?.workoutName || '—'}</div>
+          </div>
+          <div className="dashboard-kpi-card">
+            <div className="dashboard-kpi-card__label">Focus type</div>
+            <div className="dashboard-kpi-card__value">{workoutType || 'All'}</div>
+          </div>
+          <div className="dashboard-kpi-card">
+            <div className="dashboard-kpi-card__label">Focus name</div>
+            <div className="dashboard-kpi-card__value">{workoutName || 'All workouts'}</div>
+          </div>
         </div>
       </div>
 
@@ -121,6 +138,7 @@ export default function Dashboard() {
           values={data?.graph1Values || []}
           yLabel={graph1Label}
           yAxisLabel={graph1AxisLabel}
+          accentVar={graph1AccentVar}
         />
         <LineChart
           title={graph2Title}
@@ -128,6 +146,7 @@ export default function Dashboard() {
           values={data?.graph2Values || []}
           yLabel={graph2Label}
           yAxisLabel={graph2AxisLabel}
+          accentVar={graph2AccentVar}
         />
       </div>
 
@@ -135,9 +154,9 @@ export default function Dashboard() {
         <div style={{ padding: '8px 0', opacity: 0.8 }}>Loading dashboard…</div>
       ) : null}
 
-      <h3>Workout Details</h3>
+      <h3 className="dashboard-section-title">Workout Details</h3>
       <div className="table-scroll">
-        <table>
+        <table className="dashboard-table">
           <thead>
             <tr>
               <th>Date</th>
@@ -161,7 +180,11 @@ export default function Dashboard() {
             {(data?.workoutDetails || []).map((w) => (
               <tr key={w.workoutId}>
                 <td>{w.workoutDate}</td>
-                <td>{w.workoutType}</td>
+                <td>
+                  <span className={`workout-type-badge workout-type-badge--${String(w.workoutType || '').toLowerCase()}`}>
+                    {w.workoutType}
+                  </span>
+                </td>
                 <td>{w.workoutName}</td>
                 {isCardio ? (
                   <>
