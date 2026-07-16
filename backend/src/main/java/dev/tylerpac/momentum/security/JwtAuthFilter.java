@@ -1,14 +1,10 @@
 package dev.tylerpac.momentum.security;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
 
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -55,9 +51,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 return;
             }
 
-            Collection<? extends GrantedAuthority> authorities = extractAuthorities(claims);
             UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(username, null, authorities);
+                    new UsernamePasswordAuthenticationToken(username, null, java.util.List.of());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             filterChain.doFilter(request, response);
@@ -73,19 +68,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // Auth endpoints don't require JWT; login/register should work without a token.
         return path.equals("/api/auth/login") || path.equals("/api/auth/register");
-    }
-
-    private static Collection<? extends GrantedAuthority> extractAuthorities(Claims claims) {
-        Object rolesObj = claims.get("roles");
-        if (!(rolesObj instanceof List<?> list)) {
-            return List.of();
-        }
-
-        return list.stream()
-                .filter(String.class::isInstance)
-                .map(String.class::cast)
-                .map(SimpleGrantedAuthority::new)
-                .toList();
     }
 
     private static void unauthorized(HttpServletResponse response, String message) throws IOException {

@@ -32,8 +32,24 @@ body.login-body #root {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.signin-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.signin-content {
+  min-height: calc(100vh - 78px);
+  min-height: calc(100dvh - 78px);
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  padding: 12px 16px 24px;
+  box-sizing: border-box;
 }
 
 .logo {
@@ -63,6 +79,27 @@ body.login-body #root {
 
 .login-form input::placeholder {
   color: var(--color-placeholder);
+}
+
+.password-field-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.password-field-row input {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.password-toggle-btn {
+  min-width: 72px;
+  padding: 10px 12px;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 .button-group {
@@ -97,7 +134,7 @@ body.dashboard-body {
   margin: 0;
   font-family: var(--font-body);
   background-color: var(--color-bg-0);
-  height: 100vh;
+  min-height: 100vh;
   color: var(--color-text);
 }
 
@@ -105,6 +142,7 @@ body.dashboard-body {
 body.dashboard-body #root {
   display: flex;
   min-height: 100vh;
+  align-items: stretch;
 }
 
 /* Top-right signed-in user badge */
@@ -122,15 +160,11 @@ body.dashboard-body #root {
   border-radius: var(--radius-pill);
 }
 
-.user-badge__avatar {
+.user-badge__initials {
   width: 28px;
   height: 28px;
   border-radius: 999px;
-  object-fit: cover;
   border: 1px solid var(--color-border);
-}
-
-.user-badge__avatar--fallback {
   display: grid;
   place-items: center;
   font-weight: 900;
@@ -146,7 +180,6 @@ body.dashboard-body #root {
   white-space: nowrap;
 }
 
-/* Settings avatar block */
 .settings-card {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -159,40 +192,74 @@ body.dashboard-body #root {
   margin-bottom: 10px;
 }
 
-.settings-avatar-row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.settings-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 999px;
-  object-fit: cover;
-  border: 1px solid var(--color-border);
-  background-color: var(--color-surface-2);
-}
-
-.settings-avatar--empty {
-  display: grid;
-  place-items: center;
-  color: var(--color-placeholder);
-  font-weight: 900;
-}
-
-.settings-avatar-actions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
 .settings-help {
   margin-top: 8px;
   color: var(--color-placeholder);
   font-weight: 600;
   font-size: 0.9rem;
+}
+
+.settings-page {
+  display: grid;
+  gap: 12px;
+}
+
+.settings-page__subtitle {
+  margin: -2px 0 2px;
+  color: var(--color-placeholder);
+  font-weight: 600;
+}
+
+.settings-card--security,
+.settings-card--danger {
+  margin-top: 0;
+}
+
+.settings-form {
+  margin-top: 10px;
+}
+
+.settings-checklist {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-2);
+  padding: 12px;
+}
+
+.settings-checklist__title {
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.settings-checklist__item {
+  color: var(--color-placeholder);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.settings-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.settings-card--danger {
+  border-color: rgba(255, 107, 107, 0.45);
+}
+
+.btn-danger {
+  margin-top: 12px;
+  background-color: var(--color-error);
+  border: none;
+  color: #fff;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  filter: brightness(0.95);
 }
 
 body.dashboard-body a {
@@ -250,6 +317,7 @@ body.dashboard-body label {
   height: 100vh;
   position: sticky;
   top: 0;
+  align-self: flex-start;
 }
 
 .sidebar-header {
@@ -276,6 +344,11 @@ body.dashboard-body label {
   width: 110px;
   height: auto;
   display: block;
+}
+
+.sidebar-logo-link {
+  display: inline-flex;
+  align-items: center;
 }
 
 /* Mobile hamburger menu (hidden on desktop) */
@@ -376,6 +449,14 @@ body.dashboard-body label {
     display: none;
   }
 
+  .sidebar-profile {
+    display: none;
+  }
+
+  .sidebar-footer {
+    display: none;
+  }
+
   .logout-form-container {
     display: none;
   }
@@ -426,7 +507,14 @@ body.dashboard-body label {
   .mobile-menu__footer {
     margin-top: auto;
     display: flex;
-    justify-content: flex-start;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .mobile-menu__profile {
+    color: var(--color-text);
+    font-weight: 800;
   }
 }
 
@@ -500,19 +588,57 @@ body.dashboard-body label {
 .logout-form-container {
   width: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: stretch;
+}
+
+.logout-form-container .logout-btn {
+  width: 100%;
+  font-weight: 800;
+}
+
+.sidebar-footer {
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+}
+
+.sidebar-profile {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, rgba(46, 59, 78, 0.75), rgba(31, 42, 56, 0.92));
+}
+
+.sidebar-profile__label {
+  color: var(--color-placeholder);
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.sidebar-profile__name {
+  color: var(--color-text);
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Main Content */
 .main-content {
   flex: 1;
+  min-height: 100vh;
   padding: 20px;
   background-color: var(--color-bg-1);
   display: flex;
   flex-direction: column;
   gap: 14px;
-  overflow: auto;
+  overflow-y: auto;
 }
 
 /* Center top page titles (Dashboard, Settings, etc.) */
@@ -758,6 +884,11 @@ body.dashboard-body label {
   pointer-events: none;
 }
 
+.chart-wrap--recharts .chart-tooltip {
+  position: static;
+  transform: none;
+}
+
 .chart-tooltip__label {
   color: var(--color-placeholder);
   font-weight: 700;
@@ -875,6 +1006,10 @@ label.visually-hidden {
     display: none;
   }
 
+  .sidebar-footer {
+    display: none;
+  }
+
   .logout-form-container {
     display: none;
   }
@@ -962,24 +1097,6 @@ label.visually-hidden {
   padding: 0 0 0 4px;
   color: inherit;
   width: auto;
-}
-
-/* ── Theme toggle button ─────────────────────────────────── */
-.theme-toggle {
-  background: none;
-  border: 1px solid var(--color-border);
-  color: var(--color-text);
-  border-radius: var(--radius-md);
-  padding: 6px 10px;
-  cursor: pointer;
-  font-size: 1rem;
-  width: auto;
-  margin-top: auto;
-  font-family: var(--font-body);
-}
-
-.theme-toggle:hover {
-  background-color: var(--color-surface-2);
 }
 
 /* ── Set builder (Add Workout) ───────────────────────────── */

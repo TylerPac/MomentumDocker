@@ -1,36 +1,30 @@
 import React from 'react';
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
-function clampNumber(value, fallback = 0) {
-  return Number.isFinite(value) ? value : fallback;
+function toNumber(value) {
+  return Number.isFinite(value) ? value : 0;
 }
 
 function formatValue(value) {
-  if (!Number.isFinite(value)) return '—';
+  if (!Number.isFinite(value)) return 'N/A';
   if (Number.isInteger(value)) return String(value);
   return value.toFixed(2);
 }
 
 function formatDateShort(value) {
-  if (!value) return '—';
+  if (!value) return 'N/A';
   const s = String(value);
   const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (m) return `${m[2]}/${m[3]}`;
   return s;
-}
-
-function decimalsForStep(step) {
-  if (!Number.isFinite(step) || step <= 0) return 2;
-  const s = String(step);
-  const dot = s.indexOf('.');
-  return dot === -1 ? 0 : Math.min(4, s.length - dot - 1);
-}
-
-function formatTick(value, stepHint) {
-  if (!Number.isFinite(value)) return '—';
-  const d = decimalsForStep(stepHint);
-  const out = d === 0 ? String(Math.round(value)) : value.toFixed(d);
-  // trim trailing zeros
-  return out.replace(/\.0+$/, '').replace(/(\.[0-9]*?)0+$/, '$1');
 }
 
 function niceStepFromRange(minY, maxY, targetTicks) {
@@ -50,220 +44,67 @@ function ceilToStep(value, step) {
   return Math.ceil(value / step) * step;
 }
 
+function buildYScale(values, yTickMin, yTickStep, targetTickCount = 6) {
+  const ys = (values || []).map((v) => toNumber(v));
+  if (!ys.length) {
+    return { min: 0, max: 1, ticks: [0, 1] };
+  }
+
+  const dataMin = Math.min(...ys);
+  const dataMax = Math.max(...ys);
+  const step = Number.isFinite(yTickStep) && yTickStep > 0
+    ? yTickStep
+    : niceStepFromRange(dataMin, dataMax, targetTickCount);
+
+  const span = dataMax - dataMin;
+  const pad = span > 0 ? span * 0.05 : step;
+  let paddedMin = dataMin - pad;
+  let paddedMax = dataMax + pad;
+
+  if (Number.isFinite(yTickMin) && yTickMin <= dataMin) {
+    paddedMin = Math.min(paddedMin, yTickMin);
+  }
+
+  let min = floorToStep(paddedMin, step);
+  let max = ceilToStep(paddedMax, step);
+
+  if (dataMin >= 0) min = Math.max(0, min);
+
+  if (min === max) {
+    min = Math.max(0, min - step);
+    max = max + step;
+  }
+
+  const ticks = [];
+  for (let v = min; v <= max + step / 2; v += step) {
+    ticks.push(Number(v.toFixed(6)));
+    if (ticks.length >= 14) break;
+  }
+
+  return { min, max, ticks };
+}
+
+function ChartTooltip({ active, payload, label }) {
+  if (!active || !payload || !payload.length) return null;
+  return (
+    <div className="chart-tooltip">
+      <div className="chart-tooltip__label">{label || 'N/A'}</div>
+      <div className="chart-tooltip__value">{formatValue(payload[0].value)}</div>
+    </div>
+  );
+}
+
 export default function LineChart({ title, labels, values, yLabel, yAxisLabel, yTickMin, yTickStep }) {
-  const width = 700;
-  const height = 240;
-  const padLeft = 56;
-  const padRight = 20;
-  const padTop = 18;
-  const padBottom = 44;
-  const gridLines = 4;
-  const gradientId = React.useId();
+  const chartData = React.useMemo(() => {
+    return (labels || []).map((label, i) => ({
+      label: String(label || ''),
+      value: toNumber(values?.[i]),
+      shortLabel: formatDateShort(label),
+    }));
+  }, [labels, values]);
 
-  const svgRef = React.useRef(null);
-  const wrapRef = React.useRef(null);
-  const [svgScale, setSvgScale] = React.useState({ x: 1, y: 1 });
-
-  const [hoveredIndex, setHoveredIndex] = React.useState(-1);
-  const [hoverPos, setHoverPos] = React.useState(null);
-
-  React.useEffect(() => {
-    let rafId = 0;
-    let t1 = 0;
-    let t2 = 0;
-
-    function measureScale() {
-      const svg = svgRef.current;
-      const wrap = wrapRef.current;
-      if (!svg) return;
-
-      // Prefer SVG bounding box (most accurate), but fall back to wrapper if the
-      // SVG is temporarily 0x0 during layout/maximize.
-      const svgRect = svg.getBoundingClientRect();
-      const rect = (svgRect?.width > 0 && svgRect?.height > 0)
-        ? svgRect
-        : wrap?.getBoundingClientRect?.();
-
-      if (!rect || rect.width <= 0 || rect.height <= 0) return;
-
-      const nextX = rect.width / width;
-      const nextY = rect.height / height;
-      if (!Number.isFinite(nextX) || nextX <= 0) return;
-      if (!Number.isFinite(nextY) || nextY <= 0) return;
-
-      setSvgScale((prev) => (
-        Math.abs(prev.x - nextX) < 1e-4 && Math.abs(prev.y - nextY) < 1e-4
-          ? prev
-          : { x: nextX, y: nextY }
-      ));
-    }
-
-    function scheduleScale() {
-      if (rafId) cancelAnimationFrame(rafId);
-      if (t1) clearTimeout(t1);
-      if (t2) clearTimeout(t2);
-
-      rafId = requestAnimationFrame(() => {
-        rafId = requestAnimationFrame(measureScale);
-      });
-
-      // Some maximize/layout changes settle after ResizeObserver fires; re-check.
-      t1 = window.setTimeout(measureScale, 50);
-      t2 = window.setTimeout(measureScale, 250);
-    }
-
-    scheduleScale();
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(scheduleScale) : null;
-
-    const wrap = wrapRef.current;
-    const svg = svgRef.current;
-    if (wrap) ro?.observe(wrap);
-    if (svg) ro?.observe(svg);
-
-    window.addEventListener('resize', scheduleScale);
-    document.addEventListener('fullscreenchange', scheduleScale);
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', scheduleScale);
-    }
-    if (document.fonts?.ready) {
-      document.fonts.ready.then(scheduleScale).catch(() => {});
-    }
-
-    return () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      if (t1) clearTimeout(t1);
-      if (t2) clearTimeout(t2);
-      ro?.disconnect();
-      window.removeEventListener('resize', scheduleScale);
-      document.removeEventListener('fullscreenchange', scheduleScale);
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', scheduleScale);
-      }
-    };
-  }, [width, height]);
-
-  const yScale = React.useMemo(() => {
-    const ys = (values || []).map((v) => clampNumber(v, 0));
-    if (ys.length === 0) {
-      return { min: 0, max: 1, step: 1, ticks: [] };
-    }
-
-    const dataMin = Math.min(...ys);
-    const dataMax = Math.max(...ys);
-
-    const step = Number.isFinite(yTickStep) && yTickStep > 0
-      ? yTickStep
-      : niceStepFromRange(dataMin, dataMax, gridLines + 3);
-
-    // Add a little padding so points don't sit on the bounds.
-    const span = dataMax - dataMin;
-    const pad = span > 0 ? span * 0.05 : step;
-    let paddedMin = dataMin - pad;
-    let paddedMax = dataMax + pad;
-
-    // If a min is provided, treat it as a *preferred* lower bound, but never
-    // allow it to clip the dataset.
-    if (Number.isFinite(yTickMin) && yTickMin <= dataMin) {
-      paddedMin = Math.min(paddedMin, yTickMin);
-    }
-
-    let min = floorToStep(paddedMin, step);
-    let max = ceilToStep(paddedMax, step);
-
-    // These series are non-negative in the app; avoid negative axes.
-    if (dataMin >= 0) min = Math.max(0, min);
-
-    if (min === max) {
-      min = Math.max(0, min - step);
-      max = max + step;
-    }
-
-    const ticks = [];
-    const maxTicks = 14;
-    for (let v = min; v <= max + step / 2; v += step) {
-      ticks.push(v);
-      if (ticks.length >= maxTicks) break;
-    }
-
-    return { min, max, step, ticks };
-  }, [values, yTickMin, yTickStep, gridLines]);
-
-  const yTicks = React.useMemo(() => {
-    const chartH = height - padTop - padBottom;
-    if (!yScale.ticks.length) return [];
-
-    const span = (yScale.max - yScale.min) || 1;
-    return yScale.ticks.map((value) => {
-      const t = (yScale.max - value) / span;
-      const y = padTop + (chartH * t);
-      return { value, y, step: yScale.step };
-    });
-  }, [yScale, height, padTop, padBottom]);
-
-  const points = React.useMemo(() => {
-    const xs = (labels || []).map((_, i) => i);
-    const ys = (values || []).map((v) => clampNumber(v, 0));
-    if (xs.length === 0) return [];
-
-    const spanY = (yScale.max - yScale.min) || 1;
-    const spanX = (xs.length - 1) || 1;
-    const chartW = width - padLeft - padRight;
-    const chartH = height - padTop - padBottom;
-
-    return ys.map((y, i) => {
-      const xPx = padLeft + (chartW * (i / spanX));
-      const yPx = padTop + (chartH * (1 - ((y - yScale.min) / spanY)));
-      return { x: xPx, y: yPx };
-    });
-  }, [labels, values, yScale, width, height, padLeft, padRight, padTop, padBottom]);
-
-  const xTicks = React.useMemo(() => {
-    const ls = labels || [];
-    if (ls.length === 0) return [];
-
-    const maxTicks = 5;
-    const tickCount = Math.min(maxTicks, ls.length);
-    const spanX = (ls.length - 1) || 1;
-    const chartW = width - padLeft - padRight;
-
-    const indices = new Set();
-    for (let i = 0; i < tickCount; i++) {
-      indices.add(Math.round((i * (ls.length - 1)) / (tickCount - 1 || 1)));
-    }
-
-    return Array.from(indices)
-      .sort((a, b) => a - b)
-      .map((idx) => ({
-        idx,
-        label: formatDateShort(ls[idx]),
-        x: padLeft + (chartW * (idx / spanX)),
-      }));
-  }, [labels, width, padLeft, padRight]);
-
-  const polyline = points.map((p) => `${p.x},${p.y}`).join(' ');
-
-  const areaPolygon = React.useMemo(() => {
-    if (points.length === 0) return '';
-    const baselineY = height - padBottom;
-    const first = points[0];
-    const last = points[points.length - 1];
-    return `${polyline} ${last.x},${baselineY} ${first.x},${baselineY}`;
-  }, [points, polyline, height, padBottom]);
-
-  function showTooltip(index) {
-    if (index < 0 || index >= points.length) return;
-    const p = points[index];
-    setHoveredIndex(index);
-    setHoverPos({
-      leftPct: (p.x / width) * 100,
-      topPct: (p.y / height) * 100,
-    });
-  }
-
-  function hideTooltip() {
-    setHoveredIndex(-1);
-    setHoverPos(null);
-  }
+  const yScale = React.useMemo(() => buildYScale(values, yTickMin, yTickStep), [values, yTickMin, yTickStep]);
+  const gradientId = `chart-gradient-${React.useId().replace(/:/g, '')}`;
 
   return (
     <div className="chart-card">
@@ -272,133 +113,59 @@ export default function LineChart({ title, labels, values, yLabel, yAxisLabel, y
         <div className="chart-card__meta">{yLabel}</div>
       </div>
 
-      {points.length === 0 ? (
+      {chartData.length === 0 ? (
         <div className="chart-empty">No data</div>
       ) : (
-        <div className="chart-wrap" ref={wrapRef}>
-          <svg
-            className="chart-svg"
-            viewBox={`0 0 ${width} ${height}`}
-            preserveAspectRatio="none"
-            onMouseLeave={hideTooltip}
-            ref={svgRef}
-          >
-            <defs>
-              <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="currentColor" stopOpacity="0.18" />
-                <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
-              </linearGradient>
-            </defs>
+        <div className="chart-wrap chart-wrap--recharts">
+          <ResponsiveContainer width="100%" height={240}>
+            <AreaChart data={chartData} margin={{ top: 16, right: 20, bottom: 20, left: 16 }}>
+              <defs>
+                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--color-accent)" stopOpacity={0.28} />
+                  <stop offset="100%" stopColor="var(--color-accent)" stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
 
-          {/* grid (aligned with ticks) */}
-          {yTicks.map((t, i) => (
-            <line
-              key={i}
-              className="chart-grid"
-              x1={padLeft}
-              y1={t.y}
-              x2={width - padRight}
-              y2={t.y}
-            />
-          ))}
-
-          {/* axes */}
-          <line className="chart-axis" x1={padLeft} y1={height - padBottom} x2={width - padRight} y2={height - padBottom} />
-          <line className="chart-axis" x1={padLeft} y1={padTop} x2={padLeft} y2={height - padBottom} />
-
-          {/* series */}
-          <g className="chart-series">
-            {areaPolygon ? (
-              <polygon
-                className="chart-area"
-                points={areaPolygon}
-                fill={`url(#${gradientId})`}
+              <CartesianGrid stroke="var(--color-border)" vertical={false} />
+              <XAxis
+                dataKey="shortLabel"
+                tick={{ fill: 'var(--color-placeholder)', fontSize: 11, fontWeight: 700 }}
+                axisLine={{ stroke: 'var(--color-border)' }}
+                tickLine={{ stroke: 'var(--color-border)' }}
+                minTickGap={24}
               />
-            ) : null}
-
-            <polyline className="chart-line" points={polyline} />
-
-            {points.map((p, idx) => {
-              const isActive = idx === hoveredIndex;
-              const r = isActive ? 4 : 3;
-              const hit = 12;
-              // The SVG is stretched to fill its container (non-uniform X/Y scaling).
-              // Use an ellipse with compensated radii so points remain visually circular.
-              const sx = svgScale?.x || 1;
-              const sy = svgScale?.y || 1;
-              const rrX = r / sx;
-              const rrY = r / sy;
-              const hitRX = hit / sx;
-              const hitRY = hit / sy;
-
-              return (
-                <g key={idx}>
-                  {/* larger invisible hit target for hover */}
-                  <ellipse
-                    className="chart-hit"
-                    cx={p.x}
-                    cy={p.y}
-                    rx={hitRX}
-                    ry={hitRY}
-                    onMouseEnter={() => showTooltip(idx)}
-                    onMouseMove={() => showTooltip(idx)}
-                    onFocus={() => showTooltip(idx)}
-                    onBlur={hideTooltip}
-                    tabIndex={0}
-                  />
-                  <ellipse
-                    className={isActive ? 'chart-point chart-point--active' : 'chart-point'}
-                    cx={p.x}
-                    cy={p.y}
-                    rx={rrX}
-                    ry={rrY}
-                    vectorEffect="non-scaling-stroke"
-                  />
-                </g>
-              );
-            })}
-          </g>
-          </svg>
-
-          {/* Non-stretched axis tick labels (HTML overlay) */}
-          <div className="chart-overlay" aria-hidden="true">
-            {yTicks.map((t, i) => (
-              <div
-                key={`y-${i}`}
-                className="chart-y-tick"
-                style={{ top: `${(t.y / height) * 100}%`, left: `${(padLeft / width) * 100}%` }}
-              >
-                {formatTick(t.value, t.step)}
-              </div>
-            ))}
-
-            {xTicks.map((t) => (
-              <div
-                key={`x-${t.idx}`}
-                className="chart-x-tick"
-                style={{ left: `${(t.x / width) * 100}%`, top: `${((height - padBottom) / height) * 100}%` }}
-              >
-                {t.label}
-              </div>
-            ))}
-
-            <div
-              className="chart-y-axis-label"
-              style={{ left: `${(padLeft / width) * 100}%` }}
-            >
-              {yAxisLabel ?? yLabel}
-            </div>
-          </div>
-
-          {hoverPos && hoveredIndex >= 0 ? (
-            <div
-              className="chart-tooltip"
-              style={{ left: `${hoverPos.leftPct}%`, top: `${hoverPos.topPct}%` }}
-            >
-              <div className="chart-tooltip__label">{labels?.[hoveredIndex] ?? '—'}</div>
-              <div className="chart-tooltip__value">{formatValue(clampNumber(values?.[hoveredIndex], NaN))}</div>
-            </div>
-          ) : null}
+              <YAxis
+                domain={[yScale.min, yScale.max]}
+                ticks={yScale.ticks}
+                tickFormatter={formatValue}
+                tick={{ fill: 'var(--color-placeholder)', fontSize: 11, fontWeight: 700 }}
+                axisLine={{ stroke: 'var(--color-border)' }}
+                tickLine={{ stroke: 'var(--color-border)' }}
+                width={52}
+                label={{
+                  value: yAxisLabel ?? yLabel,
+                  angle: -90,
+                  position: 'insideLeft',
+                  fill: 'var(--color-placeholder)',
+                  style: { fontSize: 12, fontWeight: 700 },
+                }}
+              />
+              <Tooltip
+                content={<ChartTooltip />}
+                cursor={{ stroke: 'var(--color-border)', strokeDasharray: '4 4' }}
+                labelFormatter={(v, payload) => payload?.[0]?.payload?.label || String(v || '')}
+              />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke="var(--color-accent)"
+                strokeWidth={2.5}
+                fill={`url(#${gradientId})`}
+                dot={{ r: 3, strokeWidth: 0, fill: 'var(--color-accent)' }}
+                activeDot={{ r: 4.5, stroke: 'var(--color-bg-1)', strokeWidth: 1, fill: 'var(--color-accent)' }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       )}
     </div>

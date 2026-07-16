@@ -1,11 +1,11 @@
 import React from 'react';
-import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 
 import { AuthProvider, useAuth } from './auth';
 import Nav from './components/Nav';
-import UserBadge from './components/UserBadge';
 import { ToastProvider } from './utils/toast';
 
+const Home = React.lazy(() => import('./pages/Home'));
 const SignIn = React.lazy(() => import('./pages/SignIn'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const AddWorkout = React.lazy(() => import('./pages/AddWorkout'));
@@ -19,16 +19,31 @@ function RequireAuth({ children }) {
     return <div style={{ padding: 16 }}>Loading…</div>;
   }
   if (!user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/signin" replace />;
   }
   return children;
 }
 
 function Layout({ children }) {
+  const location = useLocation();
+  const showDashboardChrome = location.pathname !== '/' && location.pathname !== '/signin';
+
+  React.useEffect(() => {
+    if (showDashboardChrome) {
+      document.body.classList.add('dashboard-body');
+      document.body.classList.remove('login-body');
+      return () => {
+        document.body.classList.remove('dashboard-body');
+      };
+    }
+
+    document.body.classList.remove('dashboard-body');
+    return undefined;
+  }, [showDashboardChrome]);
+
   return (
     <>
-      <Nav />
-      <UserBadge />
+      {showDashboardChrome ? <Nav /> : null}
       {children}
     </>
   );
@@ -42,7 +57,8 @@ export default function App() {
         <Layout>
           <React.Suspense fallback={<div style={{ padding: 16 }}>Loading…</div>}>
             <Routes>
-              <Route path="/" element={<SignIn />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/signin" element={<SignIn />} />
               <Route
                 path="/dashboard"
                 element={(

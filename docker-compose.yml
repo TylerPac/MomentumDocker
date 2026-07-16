@@ -11,9 +11,6 @@ services:
       SPRING_DATASOURCE_USERNAME: ${MOMENTUM_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${MOMENTUM_DB_PASSWORD}
       JWT_SECRET: ${MOMENTUM_JWT_SECRET}
-      MOMENTUM_AVATAR_DIR: /data/avatars
-    volumes:
-      - avatar_data:/data/avatars
     networks:
       - momentum_net
       - proxy
@@ -37,9 +34,6 @@ services:
       - "traefik.http.routers.momentum.tls=true"
       - "traefik.http.routers.momentum.tls.certresolver=myresolver"
       - "traefik.http.services.momentum.loadbalancer.server.port=80"
-
-volumes:
-  avatar_data:
 
 networks:
   momentum_net:

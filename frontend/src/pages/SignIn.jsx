@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { apiFetch, setAccessToken } from '../api';
 import { useAuth } from '../auth';
 import { usePageMeta } from '../utils/pageMeta';
@@ -22,9 +22,6 @@ export default function SignIn() {
   const [confirmPassword, setConfirmPassword] = React.useState('');
   const [showCreatePassword, setShowCreatePassword] = React.useState(false);
   const [showCreateConfirm, setShowCreateConfirm] = React.useState(false);
-  const [email, setEmail] = React.useState('');
-  const [firstName, setFirstName] = React.useState('');
-  const [lastName, setLastName] = React.useState('');
   const [error, setError] = React.useState('');
   const [fieldErrors, setFieldErrors] = React.useState(null);
 
@@ -57,7 +54,7 @@ export default function SignIn() {
     try {
       const endpoint = mode === 'create' ? '/auth/register' : '/auth/login';
       const body = mode === 'create'
-        ? { username, password, email, firstName, lastName }
+        ? { username, password }
         : { username, password };
       const tokenRes = await apiFetch(endpoint, {
         method: 'POST',
@@ -81,36 +78,15 @@ export default function SignIn() {
   }
 
   return (
-    <>
-      <img className="logo" src="/MomentumLogo.png" alt="Momentum logo" />
-      <form onSubmit={onSubmit} className="login-form" style={{ width: 'min(420px, 90vw)' }}>
+    <div className="signin-page">
+      <div className="signin-content">
+        <Link className="home-logo-link" to="/" aria-label="Go to home page">
+          <img className="logo" src="/MomentumLogo.png" alt="Momentum logo" />
+        </Link>
+        <form onSubmit={onSubmit} className="login-form" style={{ width: 'min(420px, 90vw)' }}>
         {mode === 'create' ? (
           <>
             <div className="settings-card" style={{ marginTop: 0 }}>
-              <input
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="First name"
-                required
-              />
-              {fieldErrors?.firstName ? <div className="error-message">{fieldErrors.firstName}</div> : null}
-
-              <input
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Last name"
-                required
-              />
-              {fieldErrors?.lastName ? <div className="error-message">{fieldErrors.lastName}</div> : null}
-
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                required
-              />
-              {fieldErrors?.email ? <div className="error-message">{fieldErrors.email}</div> : null}
-
               <input
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -119,7 +95,7 @@ export default function SignIn() {
               />
               {fieldErrors?.username ? <div className="error-message">{fieldErrors.username}</div> : null}
 
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <div className="password-field-row">
                 <input
                   type={showCreatePassword ? 'text' : 'password'}
                   value={password}
@@ -129,18 +105,17 @@ export default function SignIn() {
                 />
                 <button
                   type="button"
-                  className="btn-primary"
+                  className="btn-primary password-toggle-btn"
                   onClick={() => setShowCreatePassword((v) => !v)}
                   aria-label={showCreatePassword ? 'Hide password' : 'Show password'}
                   title={showCreatePassword ? 'Hide password' : 'Show password'}
-                  style={{ width: 48, padding: 12 }}
                 >
-                  {showCreatePassword ? '🙈' : '👁'}
+                  {showCreatePassword ? 'Hide' : 'Show'}
                 </button>
               </div>
               {fieldErrors?.password ? <div className="error-message">{fieldErrors.password}</div> : null}
 
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <div className="password-field-row">
                 <input
                   type={showCreateConfirm ? 'text' : 'password'}
                   value={confirmPassword}
@@ -150,22 +125,21 @@ export default function SignIn() {
                 />
                 <button
                   type="button"
-                  className="btn-primary"
+                  className="btn-primary password-toggle-btn"
                   onClick={() => setShowCreateConfirm((v) => !v)}
                   aria-label={showCreateConfirm ? 'Hide password' : 'Show password'}
                   title={showCreateConfirm ? 'Hide password' : 'Show password'}
-                  style={{ width: 48, padding: 12 }}
                 >
-                  {showCreateConfirm ? '🙈' : '👁'}
+                  {showCreateConfirm ? 'Hide' : 'Show'}
                 </button>
               </div>
 
               <div className="settings-help" style={{ marginTop: 10 }}>
                 Password requirements:
-                <div>8+ chars: {passwordChecklist(password).length ? '✓' : '—'}</div>
-                <div>1 uppercase: {passwordChecklist(password).hasUpper ? '✓' : '—'}</div>
-                <div>1 number: {passwordChecklist(password).hasDigit ? '✓' : '—'}</div>
-                <div>Passwords match: {password && confirmPassword && password === confirmPassword ? '✓' : '—'}</div>
+                <div>8+ chars: {passwordChecklist(password).length ? 'Yes' : 'No'}</div>
+                <div>1 uppercase: {passwordChecklist(password).hasUpper ? 'Yes' : 'No'}</div>
+                <div>1 number: {passwordChecklist(password).hasDigit ? 'Yes' : 'No'}</div>
+                <div>Passwords match: {password && confirmPassword && password === confirmPassword ? 'Yes' : 'No'}</div>
               </div>
             </div>
           </>
@@ -208,7 +182,8 @@ export default function SignIn() {
             {mode === 'create' ? 'Have an account? Sign in' : 'Need an account? Create one'}
           </button>
         </div>
-      </form>
-    </>
+        </form>
+      </div>
+    </div>
   );
 }

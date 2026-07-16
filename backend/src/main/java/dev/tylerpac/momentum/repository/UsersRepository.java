@@ -9,5 +9,4 @@ import dev.tylerpac.momentum.model.Users;
 public interface UsersRepository extends JpaRepository<Users, Integer> {
     Optional<Users> findByUsername(String username);
     boolean existsByUsername(String username);
-    boolean existsByEmail(String email);
 }

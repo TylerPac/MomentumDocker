@@ -130,7 +130,6 @@ export default function History() {
 
         {!loading && items.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state__icon">🏋️</div>
             <div className="empty-state__title">No workouts found</div>
             <div className="empty-state__sub">
               <Link to="/workouts/new" className="edit-btn">Log your first workout →</Link>

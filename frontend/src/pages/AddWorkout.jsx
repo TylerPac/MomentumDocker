@@ -4,7 +4,6 @@ import { apiFetch } from '../api';
 import { isClockInputMaybeValid, parseClockToMinutes, formatMinutesAsClock } from '../utils/duration';
 import { usePageMeta } from '../utils/pageMeta';
 import { useToast } from '../utils/toast';
-import { useAuth } from '../auth';
 
 function makeEmptySet() {
   return { id: Date.now() + Math.random(), weight: '', sets: '', reps: '' };
@@ -13,10 +12,8 @@ function makeEmptySet() {
 export default function AddWorkout() {
   const navigate = useNavigate();
   const toast = useToast();
-  const { user } = useAuth();
-  const unitSystem = user?.unitSystem || 'metric';
-  const weightUnit = unitSystem === 'imperial' ? 'lbs' : 'kg';
-  const distanceUnit = unitSystem === 'imperial' ? 'mi' : 'km';
+  const weightUnit = 'kg';
+  const distanceUnit = 'km';
 
   usePageMeta({ title: 'Momentum — Add Workout', description: 'Add a new cardio or weightlifting workout.' });
 
@@ -35,7 +32,6 @@ export default function AddWorkout() {
   const [existingNames, setExistingNames] = React.useState([]);
   const [error, setError] = React.useState('');
   const [namesLoading, setNamesLoading] = React.useState(true);
-  const [autofillMsg, setAutofillMsg] = React.useState('');
   const abortRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -57,7 +53,6 @@ export default function AddWorkout() {
   // Auto-fill last session when a known name is entered
   React.useEffect(() => {
     if (!workoutName || !existingNames.includes(workoutName)) {
-      setAutofillMsg('');
       return;
     }
     const controller = new AbortController();
@@ -72,9 +67,8 @@ export default function AddWorkout() {
           setSetRows([{ id: Date.now(), weight: last.weight ?? '', sets: last.sets ?? '', reps: last.reps ?? '' }]);
         }
         setNotes('');
-        setAutofillMsg('Pre-filled from your last session — update as needed.');
       })
-      .catch(() => setAutofillMsg(''));
+      .catch(() => {});
     return () => controller.abort();
   }, [workoutName, existingNames]);
 
@@ -161,8 +155,6 @@ export default function AddWorkout() {
               ))}
             </datalist>
           </label>
-
-          {autofillMsg ? <div className="autofill-banner">{autofillMsg}</div> : null}
 
           <label>
             Workout Date

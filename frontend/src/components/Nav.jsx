@@ -1,14 +1,12 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { clearAccessToken } from '../api';
 import { useAuth } from '../auth';
-import { useTheme } from '../utils/theme';
 
 export default function Nav() {
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const { theme, toggle: toggleTheme } = useTheme();
 
   React.useEffect(() => {
     if (!user) return undefined;
@@ -48,7 +46,9 @@ export default function Nav() {
   return (
     <nav className="sidebar" aria-label="Primary">
       <div className="sidebar-header">
-        <img className="sidebar-logo-img" src="/logo512.png" alt="Momentum logo" />
+        <Link className="sidebar-logo-link" to="/" aria-label="Go to home page">
+          <img className="sidebar-logo-img" src="/logo512.png" alt="Momentum logo" />
+        </Link>
 
         <button
           type="button"
@@ -68,13 +68,16 @@ export default function Nav() {
         <NavLink to="/settings" className={({ isActive }) => (isActive ? 'is-active' : undefined)}>Settings</NavLink>
       </div>
 
-      <div className="logout-form-container">
-        <button type="button" className="logout-btn" onClick={onLogout}>Logout</button>
-      </div>
+      <div className="sidebar-footer">
+        <div className="sidebar-profile" aria-label="Signed in user">
+          <div className="sidebar-profile__label">Signed in as</div>
+          <div className="sidebar-profile__name">{user.username}</div>
+        </div>
 
-      <button type="button" className="theme-toggle" onClick={toggleTheme} title="Toggle theme">
-        {theme === 'dark' ? '☀️' : '🌙'}
-      </button>
+        <div className="logout-form-container">
+          <button type="button" className="logout-btn" onClick={onLogout}>Logout</button>
+        </div>
+      </div>
 
       <div className={mobileOpen ? 'mobile-menu mobile-menu--open' : 'mobile-menu'} aria-hidden={!mobileOpen}>
         <div className="mobile-menu__content" role="dialog" aria-label="Menu">
@@ -86,6 +89,7 @@ export default function Nav() {
             <NavLink to="/settings" className={({ isActive }) => (isActive ? 'is-active' : undefined)} onClick={closeMobileMenu}>Settings</NavLink>
           </div>
           <div className="mobile-menu__footer">
+            <div className="mobile-menu__profile" aria-label="Signed in user">{user.username}</div>
             <button type="button" className="logout-btn" onClick={onLogout}>Logout</button>
           </div>
         </div>

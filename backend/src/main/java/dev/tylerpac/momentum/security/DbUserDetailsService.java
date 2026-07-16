@@ -24,7 +24,6 @@ public class DbUserDetailsService implements UserDetailsService {
 
         return User.withUsername(user.getUsername())
                 .password(user.getPassword())
-                .authorities("ROLE_USER")
                 .build();
     }
 }

@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface WorkoutRepository extends JpaRepository<Workout, Integer> {
+    void deleteByUser(Users user);
+
     long countByUser(Users user);
 
     List<Workout> findByUserOrderByWorkoutDateDesc(Users user);

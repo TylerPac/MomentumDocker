@@ -4,16 +4,13 @@ import { apiFetch } from '../api';
 import { formatMinutesAsClock, isClockInputMaybeValid, parseClockToMinutes } from '../utils/duration';
 import { usePageMeta } from '../utils/pageMeta';
 import { useToast } from '../utils/toast';
-import { useAuth } from '../auth';
 
 export default function EditWorkout() {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
-  const { user } = useAuth();
-  const unitSystem = user?.unitSystem || 'metric';
-  const weightUnit = unitSystem === 'imperial' ? 'lbs' : 'kg';
-  const distanceUnit = unitSystem === 'imperial' ? 'mi' : 'km';
+  const weightUnit = 'kg';
+  const distanceUnit = 'km';
 
   usePageMeta({ title: 'Momentum — Edit Workout', description: 'Edit an existing workout.' });
 
