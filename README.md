@@ -1,16 +1,22 @@
-# Momentum
- 
-Fitness tracking and analytics app.
 
-This repo is in the middle of a migration from the original JSP/Servlet app to:
-- `backend/` (Spring Boot REST API)
-- `frontend/` (React + Vite)
+<p align="center">
+    <img src="frontend/public/MomentumLogo.png" alt="Momentum logo" width="500" />
+</p>
+<p align="center"><strong>Fitness tracking and analytics app.</strong></p>
+
+## About Momentum
+I built Momentum to solve a personal problem: I wanted a clean, easy way to log workouts and visualize trends over time without paying another subscription provider.
+
+
+## Website
+- [momentum.tylerpac.dev](https://momentum.tylerpac.dev/)
+
+
 
 ## Features
 - User authentication and account management
 - Workout logging and history tracking
 - Data analytics and progress visualization
-- Responsive JSP-based UI
 - RESTful endpoints for data operations
 - Hibernate ORM for database management
 - Separate MySQL database instance for isolation
@@ -25,100 +31,63 @@ This repo is in the middle of a migration from the original JSP/Servlet app to:
 - **Containerization:** Docker, Docker Compose
 - **CI/CD:** Jenkins
 
-## Local development
+## Architecture
 
-### Option B: no Docker (recommended for local UI dev)
+Momentum is a containerized full-stack app with a React frontend, Spring Boot backend, and MySQL persistence layer.
 
-#### Prereqs
-- Node.js + npm installed
-- Java JDK installed
+### System Architecture
 
-#### Backend (Spring Boot)
-Run with the `dev` profile to use the homelab database on your LAN.
+```mermaid
+flowchart LR
+    U[User Browser]
 
-From the repo root:
-```powershell
-mvn -f .\backend\pom.xml spring-boot:run -Dspring-boot.run.profiles=dev
+    subgraph RT[Production on VPS]
+        FE[Frontend Container\nNginx + React Static Build]
+        BE[Backend Container\nSpring Boot API + JWT Security]
+        DB[(MySQL Container\nSame VPS Docker Network)]
+    end
+
+    U -->|HTTPS via Traefik| FE
+    FE -->|/api proxy| BE
+    BE -->|JPA/Hibernate| DB
+
+    subgraph DEV[Local Development]
+        VITE[Vite Dev Server]
+        API[Backend Dev Profile :8085]
+        DEVDB[(Local MySQL in Docker :3307)]
+    end
+
+    U -. hot reload .-> VITE
+    VITE -. /api proxy .-> API
+    API -. JDBC .-> DEVDB
 ```
 
-Required env vars (do not commit secrets):
-```powershell
-$env:MYSQL_USER = "..."
-$env:MYSQL_PASSWORD = "..."
+### Database Relationship Diagram
+
+```mermaid
+erDiagram
+    direction LR
+
+    USERS {
+        int user_id PK
+        string username UK
+        string password
+        string unit_system
+    }
+
+    WORKOUT {
+        int workout_id PK
+        int user_id FK
+        string workout_type
+        string workout_name
+        date workout_date
+        float distance
+        float time
+        float weight
+        int sets
+        int reps
+        string notes
+    }
+
+    USERS ||--o{ WORKOUT : owns
 ```
-
-Defaults used by the `dev` profile:
-- Host: `192.168.1.26`
-- DB name: `homelabdatabase`
-
-Optional overrides:
-```powershell
-$env:MOMENTUM_DEV_DB_HOST = "192.168.1.26"
-$env:MOMENTUM_DEV_DB_NAME = "homelabdatabase"
-```
-
-Run tests:
-```powershell
-mvn -f .\backend\pom.xml test
-```
-
-Stop the backend: press `Ctrl+C` in the terminal running it.
-
-#### Frontend (React + Vite)
-From the repo root:
-```powershell
-cd .\frontend
-npm install
-npm run dev
-```
-
-Stop the frontend: press `Ctrl+C` in the terminal running it.
-
-#### Frontend ↔ Backend connectivity
-- Dev mode: Vite proxies `/api/*` to the backend.
-- Default proxy target is `http://localhost:8085`.
-
-Override if needed:
-```powershell
-$env:VITE_API_TARGET = "http://localhost:8085"
-npm run dev
-```
-
-### Option A: Docker Compose (matches Jenkins/prod deployment)
-From the repo root:
-```powershell
-docker compose up -d --build
-```
-
-Ports (current defaults):
-- Frontend: `http://localhost:8082`
-- Backend: `http://localhost:8085`
-- MySQL: `localhost:3307`
-
-## Getting Started
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/TylerPac/MomentumDocker.git
-   ```
-2. **Run locally:**
-   - See “Local development” above
-
-## Portfolio Value
-This project showcases:
-- End-to-end web application development
-- Database design and ORM integration
-- Container orchestration and automation
-- Real-world CI/CD pipeline implementation
-- Clean separation of environments and data
-
-## Repository
-- [GitHub: TylerPac/MomentumDocker](https://github.com/TylerPac/MomentumDocker)
-
-## Live Demo
-- [https://momentum.tylerpac.dev/](https://momentum.tylerpac.dev/)
-
----
-
-*Created by Tyler Pac. For more projects, visit my portfolio!*
-## Portfolio
-- [https://www.tylerpac.dev/](https://www.tylerpac.dev/)
