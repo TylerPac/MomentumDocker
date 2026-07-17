@@ -91,3 +91,11 @@ erDiagram
 
     USERS ||--o{ WORKOUT : owns
 ```
+
+## Contact
+
+**Let's Connect**
+
+For collaboration, engineering opportunities, or project discussions, use the contact page:
+
+- [Contact TylerPac Development](https://www.tylerpac.dev/contact)
