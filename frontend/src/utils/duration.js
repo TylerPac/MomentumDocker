@@ -36,3 +36,39 @@ export function formatMinutesAsClock(value) {
 
   return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
+
+export function splitMinutesToParts(value) {
+  if (value == null) return { minutes: '', seconds: '' };
+
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return { minutes: '', seconds: '' };
+
+  const totalSeconds = Math.round(n * 60);
+  return {
+    minutes: String(Math.floor(totalSeconds / 60)),
+    seconds: String(totalSeconds % 60).padStart(2, '0'),
+  };
+}
+
+export function parsePartsToMinutes(minutesInput, secondsInput) {
+  const mRaw = String(minutesInput ?? '').trim();
+  const sRaw = String(secondsInput ?? '').trim();
+
+  if (!mRaw && !sRaw) return null;
+
+  if (!/^\d+$/.test(mRaw || '0')) {
+    throw new Error('Minutes must be a non-negative whole number');
+  }
+  if (!/^\d+$/.test(sRaw || '0')) {
+    throw new Error('Seconds must be a whole number between 0 and 59');
+  }
+
+  const minutes = Number(mRaw || '0');
+  const seconds = Number(sRaw || '0');
+
+  if (seconds < 0 || seconds > 59) {
+    throw new Error('Seconds must be between 0 and 59');
+  }
+
+  return minutes + seconds / 60;
+}

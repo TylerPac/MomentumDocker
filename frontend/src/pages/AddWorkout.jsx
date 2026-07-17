@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api';
-import { isClockInputMaybeValid, parseClockToMinutes, formatMinutesAsClock } from '../utils/duration';
+import { parsePartsToMinutes, splitMinutesToParts } from '../utils/duration';
 import { usePageMeta } from '../utils/pageMeta';
 import { useToast } from '../utils/toast';
 
@@ -24,7 +24,8 @@ export default function AddWorkout() {
 
   // Cardio fields
   const [distance, setDistance] = React.useState('');
-  const [time, setTime] = React.useState('');
+  const [timeMinutes, setTimeMinutes] = React.useState('');
+  const [timeSeconds, setTimeSeconds] = React.useState('');
 
   // Weightlifting: multiple sets
   const [setRows, setSetRows] = React.useState([makeEmptySet()]);
@@ -62,7 +63,9 @@ export default function AddWorkout() {
         setWorkoutType(last.workoutType || 'Cardio');
         if (last.workoutType === 'Cardio') {
           setDistance(last.distance ?? '');
-          setTime(last.time != null ? formatMinutesAsClock(last.time) : '');
+          const parts = splitMinutesToParts(last.time);
+          setTimeMinutes(parts.minutes);
+          setTimeSeconds(parts.seconds);
         } else {
           setSetRows([{ id: Date.now(), weight: last.weight ?? '', sets: last.sets ?? '', reps: last.reps ?? '' }]);
         }
@@ -106,8 +109,7 @@ export default function AddWorkout() {
         }));
         await apiFetch('/workouts/batch', { method: 'POST', body: JSON.stringify(payloads) });
       } else {
-        let parsedTime = null;
-        if (time.trim() !== '') parsedTime = parseClockToMinutes(time);
+        const parsedTime = parsePartsToMinutes(timeMinutes, timeSeconds);
         const payload = {
           workoutType,
           workoutName,
@@ -169,17 +171,24 @@ export default function AddWorkout() {
               </label>
               <label>
                 Time
-                <input
-                  value={time}
-                  onChange={(e) => {
-                    const next = e.target.value;
-                    if (!isClockInputMaybeValid(next)) return;
-                    setTime(next);
-                  }}
-                  placeholder="m:ss"
-                  inputMode="numeric"
-                  autoComplete="off"
-                />
+                <div className="cardio-time-grid">
+                  <input
+                    value={timeMinutes}
+                    onChange={(e) => setTimeMinutes(e.target.value.replace(/\D/g, ''))}
+                    placeholder="Min"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    aria-label="Cardio time minutes"
+                  />
+                  <input
+                    value={timeSeconds}
+                    onChange={(e) => setTimeSeconds(e.target.value.replace(/\D/g, ''))}
+                    placeholder="Sec"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    aria-label="Cardio time seconds"
+                  />
+                </div>
               </label>
             </>
           ) : (

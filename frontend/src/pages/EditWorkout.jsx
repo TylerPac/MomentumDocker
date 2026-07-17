@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../api';
-import { formatMinutesAsClock, isClockInputMaybeValid, parseClockToMinutes } from '../utils/duration';
+import { parsePartsToMinutes, splitMinutesToParts } from '../utils/duration';
 import { usePageMeta } from '../utils/pageMeta';
 import { useToast } from '../utils/toast';
 
@@ -23,7 +23,8 @@ export default function EditWorkout() {
   const [notes, setNotes] = React.useState('');
 
   const [distance, setDistance] = React.useState('');
-  const [time, setTime] = React.useState('');
+  const [timeMinutes, setTimeMinutes] = React.useState('');
+  const [timeSeconds, setTimeSeconds] = React.useState('');
   const [weight, setWeight] = React.useState('');
   const [sets, setSets] = React.useState('');
   const [reps, setReps] = React.useState('');
@@ -42,7 +43,14 @@ export default function EditWorkout() {
         setWorkoutName(w.workoutName || '');
         setWorkoutDate(w.workoutDate || '');
         setDistance(w.distance ?? '');
-        setTime(type === 'Cardio' ? formatMinutesAsClock(w.time) : (w.time ?? ''));
+        if (type === 'Cardio') {
+          const parts = splitMinutesToParts(w.time);
+          setTimeMinutes(parts.minutes);
+          setTimeSeconds(parts.seconds);
+        } else {
+          setTimeMinutes('');
+          setTimeSeconds('');
+        }
         setWeight(w.weight ?? '');
         setSets(w.sets ?? '');
         setReps(w.reps ?? '');
@@ -64,10 +72,9 @@ export default function EditWorkout() {
     setError('');
 
     try {
-      let parsedTime = null;
-      if (workoutType === 'Cardio' && time.trim() !== '') {
-        parsedTime = parseClockToMinutes(time);
-      }
+      const parsedTime = workoutType === 'Cardio'
+        ? parsePartsToMinutes(timeMinutes, timeSeconds)
+        : null;
 
       const payload = {
         workoutType,
@@ -126,17 +133,24 @@ export default function EditWorkout() {
               </label>
               <label>
                 Time
-                <input
-                  value={time}
-                  onChange={(e) => {
-                    const next = e.target.value;
-                    if (!isClockInputMaybeValid(next)) return;
-                    setTime(next);
-                  }}
-                  placeholder="m:ss"
-                  inputMode="numeric"
-                  autoComplete="off"
-                />
+                <div className="cardio-time-grid">
+                  <input
+                    value={timeMinutes}
+                    onChange={(e) => setTimeMinutes(e.target.value.replace(/\D/g, ''))}
+                    placeholder="Min"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    aria-label="Cardio time minutes"
+                  />
+                  <input
+                    value={timeSeconds}
+                    onChange={(e) => setTimeSeconds(e.target.value.replace(/\D/g, ''))}
+                    placeholder="Sec"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    aria-label="Cardio time seconds"
+                  />
+                </div>
               </label>
             </>
           ) : (

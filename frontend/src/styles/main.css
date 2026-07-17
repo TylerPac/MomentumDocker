@@ -65,21 +65,27 @@ body.login-body #root {
 }
 
 .signin-logo-link {
-  width: auto;
+  width: 100%;
   height: auto;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 14px;
 }
 
 .signin-logo {
-  width: 500px;
+  width: min(500px, 92vw);
   height: auto;
-  transform: translateX(10px);
+  transform: none;
   display: block;
   object-fit: contain;
   filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.26));
+}
+
+.cardio-time-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .logo-name {
@@ -1124,6 +1130,10 @@ label.visually-hidden {
   .main-content {
     padding: 14px;
     overflow: visible;
+  }
+
+  .signin-logo {
+    width: min(360px, 88vw);
   }
 
   /* Dashboard: keep the two selects on one row, summary below. */
