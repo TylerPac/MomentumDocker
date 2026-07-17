@@ -53,8 +53,6 @@ export default function Home() {
               </Link>
               <span className="home-hero__meta">No clutter. Just your lifts and cardio trends.</span>
             </div>
-
-            <p className="home-scroll-hint">Scroll to experience the flow</p>
           </div>
 
           <div className="home-hero__media" aria-hidden="true">
