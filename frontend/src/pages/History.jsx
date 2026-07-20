@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../api';
+import { useAuth } from '../auth';
+import '../styles/pages/History.css';
 import { formatMinutesAsClock } from '../utils/duration';
 import { usePageMeta } from '../utils/pageMeta';
 import { useToast } from '../utils/toast';
+import { formatDisplayNumber, getUnitPreference } from '../utils/units';
 
 const PAGE_SIZE = 50;
 
@@ -28,7 +31,9 @@ function groupByDate(items) {
 }
 
 export default function History() {
+  const { user } = useAuth();
   const toast = useToast();
+  const { distanceUnit, weightUnit } = getUnitPreference(user?.unitSystem);
 
   const [items, setItems] = React.useState([]);
   const [error, setError] = React.useState('');
@@ -142,9 +147,9 @@ export default function History() {
                 <tr>
                   <th>Type</th>
                   <th>Name</th>
-                  <th>Distance</th>
+                  <th>Distance ({distanceUnit})</th>
                   <th>Time</th>
-                  <th>Weight</th>
+                  <th>Weight ({weightUnit})</th>
                   <th>Sets</th>
                   <th>Reps</th>
                   <th>Notes</th>
@@ -161,9 +166,9 @@ export default function History() {
                       <tr key={w.workoutId}>
                         <td>{w.workoutType}</td>
                         <td>{w.workoutName}</td>
-                        <td>{w.distance ?? ''}</td>
+                        <td>{formatDisplayNumber(w.distance)}</td>
                         <td>{w.workoutType === 'Cardio' ? formatMinutesAsClock(w.time) : (w.time ?? '')}</td>
-                        <td>{w.weight ?? ''}</td>
+                        <td>{formatDisplayNumber(w.weight)}</td>
                         <td>{w.sets ?? ''}</td>
                         <td>{w.reps ?? ''}</td>
                         <td style={{ maxWidth: 180, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '0.85rem' }}>{w.notes || ''}</td>

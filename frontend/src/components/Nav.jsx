@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { clearAccessToken } from '../api';
 import { useAuth } from '../auth';
+import '../styles/components/Nav.css';
 
 export default function Nav() {
   const navigate = useNavigate();
@@ -81,7 +82,19 @@ export default function Nav() {
 
       <div className={mobileOpen ? 'mobile-menu mobile-menu--open' : 'mobile-menu'} aria-hidden={!mobileOpen}>
         <div className="mobile-menu__content" role="dialog" aria-label="Menu">
-          <div className="mobile-menu__spacer" />
+          <div className="mobile-menu__header">
+            <Link className="mobile-menu__brand" to="/" aria-label="Go to home page" onClick={closeMobileMenu}>
+              <img className="mobile-menu__logo" src="/MomentumLogo.png" alt="Momentum logo" />
+            </Link>
+            <button
+              type="button"
+              className="mobile-menu__close"
+              aria-label="Close menu"
+              onClick={closeMobileMenu}
+            >
+              ×
+            </button>
+          </div>
           <div className="mobile-menu__nav" aria-label="Mobile navigation">
             <NavLink to="/dashboard" className={({ isActive }) => (isActive ? 'is-active' : undefined)} onClick={closeMobileMenu}>Dashboard</NavLink>
             <NavLink to="/workouts/new" className={({ isActive }) => (isActive ? 'is-active' : undefined)} onClick={closeMobileMenu}>Add Workout</NavLink>

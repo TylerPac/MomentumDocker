@@ -1,9 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api';
+import { useAuth } from '../auth';
+import '../styles/pages/AddWorkout.css';
 import { parsePartsToMinutes, splitMinutesToParts } from '../utils/duration';
 import { usePageMeta } from '../utils/pageMeta';
 import { useToast } from '../utils/toast';
+import { formatDisplayNumber, getUnitPreference } from '../utils/units';
 
 function makeEmptySet() {
   return { id: Date.now() + Math.random(), weight: '', sets: '', reps: '' };
@@ -12,8 +15,8 @@ function makeEmptySet() {
 export default function AddWorkout() {
   const navigate = useNavigate();
   const toast = useToast();
-  const weightUnit = 'kg';
-  const distanceUnit = 'km';
+  const { user } = useAuth();
+  const { weightUnit, distanceUnit } = getUnitPreference(user?.unitSystem);
 
   usePageMeta({ title: 'Momentum — Add Workout', description: 'Add a new cardio or weightlifting workout.' });
 
@@ -62,12 +65,12 @@ export default function AddWorkout() {
         if (!last) return;
         setWorkoutType(last.workoutType || 'Cardio');
         if (last.workoutType === 'Cardio') {
-          setDistance(last.distance ?? '');
+          setDistance(formatDisplayNumber(last.distance));
           const parts = splitMinutesToParts(last.time);
           setTimeMinutes(parts.minutes);
           setTimeSeconds(parts.seconds);
         } else {
-          setSetRows([{ id: Date.now(), weight: last.weight ?? '', sets: last.sets ?? '', reps: last.reps ?? '' }]);
+          setSetRows([{ id: Date.now(), weight: formatDisplayNumber(last.weight), sets: last.sets ?? '', reps: last.reps ?? '' }]);
         }
         setNotes('');
       })

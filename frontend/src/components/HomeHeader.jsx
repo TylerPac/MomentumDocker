@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth';
-import '../styles/HomeHeader.css';
+import '../styles/components/HomeHeader.css';
 
 
 export default function HomeHeader() {

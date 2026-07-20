@@ -2,7 +2,10 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch, clearAccessToken } from '../api';
 import { useAuth } from '../auth';
+import '../styles/pages/Settings.css';
+import '../styles/pages/WorkoutForms.css';
 import { usePageMeta } from '../utils/pageMeta';
+import { getUnitPreference } from '../utils/units';
 
 function getFieldErrors(err) {
   const data = err?.data;
@@ -23,9 +26,14 @@ function passwordChecklist(password) {
 export default function Settings() {
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
+  const { unitSystem: currentUnitSystem, distanceUnit, weightUnit } = getUnitPreference(user?.unitSystem);
 
   usePageMeta({ title: 'Momentum — Settings', description: 'Update your Momentum account settings.' });
 
+  const [unitSystem, setUnitSystem] = React.useState(currentUnitSystem);
+  const [unitsSaving, setUnitsSaving] = React.useState(false);
+  const [unitsError, setUnitsError] = React.useState('');
+  const [unitsSuccess, setUnitsSuccess] = React.useState('');
   const [currentPassword, setCurrentPassword] = React.useState('');
   const [newPassword, setNewPassword] = React.useState('');
   const [confirmNewPassword, setConfirmNewPassword] = React.useState('');
@@ -39,7 +47,12 @@ export default function Settings() {
   const [deleteSaving, setDeleteSaving] = React.useState(false);
   const [deleteError, setDeleteError] = React.useState('');
 
+  const isUnitsDirty = unitSystem !== currentUnitSystem;
   const isSecurityDirty = Boolean(currentPassword || newPassword || confirmNewPassword);
+
+  React.useEffect(() => {
+    setUnitSystem(currentUnitSystem);
+  }, [currentUnitSystem]);
 
   React.useEffect(() => {
     function onBeforeUnload(e) {
@@ -51,6 +64,27 @@ export default function Settings() {
     window.addEventListener('beforeunload', onBeforeUnload);
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
   }, [isSecurityDirty]);
+
+  async function onUnitsSubmit(e) {
+    e.preventDefault();
+    setUnitsError('');
+    setUnitsSuccess('');
+
+    setUnitsSaving(true);
+    try {
+      const resp = await apiFetch('/settings/preferences/unit-system', {
+        method: 'POST',
+        body: JSON.stringify({ unitSystem }),
+      });
+      const updatedUser = resp?.user || null;
+      if (updatedUser) setUser(updatedUser);
+      setUnitsSuccess(resp?.message || 'Units updated');
+    } catch (err) {
+      setUnitsError(err?.message || 'Failed to update units');
+    } finally {
+      setUnitsSaving(false);
+    }
+  }
 
   async function onSecuritySubmit(e) {
     e.preventDefault();
@@ -122,6 +156,31 @@ export default function Settings() {
       <div className="page page-narrow settings-page">
         <h2>Settings</h2>
         <p className="settings-page__subtitle">Manage your account security and data.</p>
+
+        <div className="settings-card">
+          <div className="settings-card__title">Units</div>
+          <div className="settings-help">
+            Choose how workout distance and weight are displayed. Current labels: {distanceUnit} for cardio distance and {weightUnit} for lifting weight.
+          </div>
+          <form onSubmit={onUnitsSubmit} className="workout-form settings-form">
+            <label>
+              Unit system
+              <select value={unitSystem} onChange={(e) => setUnitSystem(e.target.value)}>
+                <option value="metric">Metric (km, kg)</option>
+                <option value="imperial">Imperial (mi, lb)</option>
+              </select>
+            </label>
+
+            {unitsError ? <div className="error-message">{unitsError}</div> : null}
+            {unitsSuccess ? <div className="success-message">{unitsSuccess}</div> : null}
+
+            <div className="settings-actions">
+              <button type="submit" className="btn-primary" disabled={unitsSaving || !isUnitsDirty}>
+                {unitsSaving ? 'Saving...' : 'Update units'}
+              </button>
+            </div>
+          </form>
+        </div>
 
         <div className="settings-card settings-card--security">
           <div className="settings-card__title">Security</div>

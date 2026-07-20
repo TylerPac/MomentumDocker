@@ -27,6 +27,7 @@ import dev.tylerpac.momentum.model.Users;
 import dev.tylerpac.momentum.model.Workout;
 import dev.tylerpac.momentum.repository.UsersRepository;
 import dev.tylerpac.momentum.repository.WorkoutRepository;
+import dev.tylerpac.momentum.units.UnitSystem;
 
 @RestController
 @RequestMapping("/api/workouts")
@@ -59,7 +60,7 @@ public class WorkoutsController {
 
         Page<Workout> result = workoutRepository.findHistoryFiltered(user, search, workoutType, sqlFrom, sqlTo, pageRequest);
 
-        List<WorkoutDto> items = result.getContent().stream().map(WorkoutsController::toDto).toList();
+        List<WorkoutDto> items = result.getContent().stream().map(workout -> toDto(workout, user)).toList();
         return Map.of(
                 "items", items,
                 "page", result.getNumber(),
@@ -80,7 +81,7 @@ public class WorkoutsController {
         Users user = requireUser(authentication);
         return workoutRepository
                 .findFirstByUserAndWorkoutNameOrderByWorkoutDateDescWorkoutIdDesc(user, name)
-                .map(WorkoutsController::toDto)
+            .map(workout -> toDto(workout, user))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No previous workout found"));
     }
 
@@ -94,7 +95,7 @@ public class WorkoutsController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Workout not found");
         }
 
-        return toDto(workout);
+        return toDto(workout, user);
     }
 
     @PostMapping("/batch")
@@ -109,10 +110,10 @@ public class WorkoutsController {
         List<Workout> saved = reqs.stream().map(req -> {
             Workout w = new Workout();
             w.setUser(user);
-            applyRequest(w, req);
+            applyRequest(w, req, user);
             return workoutRepository.save(w);
         }).toList();
-        return saved.stream().map(WorkoutsController::toDto).toList();
+        return saved.stream().map(workout -> toDto(workout, user)).toList();
     }
 
     @PostMapping
@@ -121,10 +122,10 @@ public class WorkoutsController {
 
         Workout workout = new Workout();
         workout.setUser(user);
-        applyRequest(workout, req);
+        applyRequest(workout, req, user);
 
         Workout saved = workoutRepository.save(workout);
-        return toDto(saved);
+        return toDto(saved, user);
     }
 
     @PutMapping("/{id}")
@@ -137,9 +138,9 @@ public class WorkoutsController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Workout not found");
         }
 
-        applyRequest(workout, req);
+        applyRequest(workout, req, user);
         Workout saved = workoutRepository.save(workout);
-        return toDto(saved);
+        return toDto(saved, user);
     }
 
     @DeleteMapping("/{id}")
@@ -163,7 +164,7 @@ public class WorkoutsController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not signed in"));
     }
 
-    private static void applyRequest(Workout workout, WorkoutUpsertRequest req) {
+    private static void applyRequest(Workout workout, WorkoutUpsertRequest req, Users user) {
         Map<String, String> fieldErrors = validateWorkoutRequest(req);
         if (!fieldErrors.isEmpty()) {
             throw new ValidationException(HttpStatus.BAD_REQUEST, "Invalid workout payload", fieldErrors);
@@ -177,24 +178,24 @@ public class WorkoutsController {
         workout.setWorkoutDate(req.workoutDate() != null && !req.workoutDate().isBlank()
                 ? parseDateOrThrow(req.workoutDate(), "workoutDate")
                 : null);
-        workout.setDistance(req.distance());
+        workout.setDistance(UnitSystem.distanceToCanonical(req.distance(), user.getUnitSystem()));
         workout.setTime(req.time());
-        workout.setWeight(req.weight());
+        workout.setWeight(UnitSystem.weightToCanonical(req.weight(), user.getUnitSystem()));
         workout.setSets(req.sets());
         workout.setReps(req.reps());
         workout.setNotes(req.notes() != null ? req.notes().trim() : null);
     }
 
-    private static WorkoutDto toDto(Workout w) {
+        private static WorkoutDto toDto(Workout w, Users user) {
         String date = w.getWorkoutDate() != null ? w.getWorkoutDate().toString() : null;
         return new WorkoutDto(
                 w.getWorkoutId(),
                 w.getWorkoutType(),
                 w.getWorkoutName(),
                 date,
-                w.getDistance(),
+            UnitSystem.distanceFromCanonical(w.getDistance(), user.getUnitSystem()),
                 w.getTime(),
-                w.getWeight(),
+            UnitSystem.weightFromCanonical(w.getWeight(), user.getUnitSystem()),
                 w.getSets(),
                 w.getReps(),
                 w.getNotes()

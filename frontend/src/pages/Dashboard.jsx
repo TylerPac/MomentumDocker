@@ -1,8 +1,11 @@
 import React from 'react';
 import { apiFetch } from '../api';
+import { useAuth } from '../auth';
 import LineChart from '../components/LineChart';
+import '../styles/pages/Dashboard.css';
 import { formatMinutesAsClock } from '../utils/duration';
 import { usePageMeta } from '../utils/pageMeta';
+import { formatDisplayNumber, getUnitPreference } from '../utils/units';
 
 function flattenWorkoutMap(workoutMap) {
   const entries = Object.entries(workoutMap || {});
@@ -11,10 +14,12 @@ function flattenWorkoutMap(workoutMap) {
 }
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const [data, setData] = React.useState(null);
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(true);
   const [dateRange, setDateRange] = React.useState('all');
+  const { distanceUnit, weightUnit, paceUnit } = getUnitPreference(user?.unitSystem);
 
   usePageMeta({ title: 'Momentum — Dashboard', description: 'Momentum dashboard and workout charts.' });
 
@@ -62,72 +67,82 @@ export default function Dashboard() {
   }
 
   const isCardio = workoutType === 'Cardio';
-  const graph1Label = isCardio ? 'Pace (time/distance)' : 'Weight';
-  const graph2Label = isCardio ? 'Distance' : 'Volume (weight × sets × reps)';
+  const graph1Label = isCardio ? `Pace (${paceUnit})` : `Weight (${weightUnit})`;
+  const graph2Label = isCardio ? `Distance (${distanceUnit})` : `Volume (${weightUnit} × sets × reps)`;
 
   const graph1Title = isCardio ? 'Pace' : 'Weight';
-  const graph2Title = isCardio ? 'Distance per run' : 'Volume';
+  const graph2Title = isCardio ? `Distance per run (${distanceUnit})` : 'Volume';
 
   const graph1AccentVar = isCardio ? '--color-accent' : '--color-accent-2';
   const graph2AccentVar = isCardio ? '--color-accent-2' : '--color-accent-3';
 
-  const graph1AxisLabel = isCardio ? 'Pace' : 'Weight';
-  const graph2AxisLabel = isCardio ? 'Distance' : 'Volume';
+  const graph1AxisLabel = isCardio ? `Pace (${paceUnit})` : `Weight (${weightUnit})`;
+  const graph2AxisLabel = isCardio ? `Distance (${distanceUnit})` : `Volume (${weightUnit})`;
 
   return (
     <div className="main-content">
       <h2 className="page-title page-title--dashboard">Dashboard</h2>
       {error ? <div className="error-message">{error}</div> : null}
-
+      
       <div className="dashboard-controls">
-        <div className="date-range-toggle">
-          {[['30', '30 days'], ['90', '90 days'], ['all', 'All time']].map(([val, label]) => (
-            <button
-              key={val}
-              type="button"
-              className={`date-range-btn${dateRange === val ? ' date-range-btn--active' : ''}`}
-              onClick={() => setDateRange(val)}
-              disabled={loading}
-            >{label}</button>
-          ))}
+        <div className="dashboard-control">
+          <div className="date-range-toggle">
+            {[
+              ['30', '30 days'],
+              ['90', '90 days'],
+              ['all', 'All time'],
+            ].map(([val, label]) => (
+              <button
+                key={val}
+                type="button"
+                className={`date-range-btn ${
+                  dateRange === val ? 'date-range-btn--active' : ''
+                }`}
+                onClick={() => setDateRange(val)}
+                disabled={loading}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
-        <label>
-          Workout Type
-          <select value={workoutType} onChange={(e) => onTypeChange(e.target.value)} disabled={!data || loading}>
-            <option value="" disabled>Select</option>
+
+        <div className="dashboard-control">
+          <select
+            value={workoutType}
+            onChange={(e) => onTypeChange(e.target.value)}
+            disabled={!data || loading}
+            aria-label="Workout Type"
+          >
+            <option value="" disabled>
+              Select
+            </option>
+
             {sortedWorkoutTypes.map(([type]) => (
-              <option key={type} value={type}>{type}</option>
+              <option key={type} value={type}>
+                {type}
+              </option>
             ))}
           </select>
-        </label>
+        </div>
 
-        <label>
-          Workout Name
-          <select value={workoutName} onChange={(e) => onNameChange(e.target.value)} disabled={!workoutType || loading}>
-            <option value="" disabled>Select</option>
+        <div className="dashboard-control">
+          <select
+            value={workoutName}
+            onChange={(e) => onNameChange(e.target.value)}
+            disabled={!workoutType || loading}
+            aria-label="Workout Name"
+          >
+            <option value="" disabled>
+              Select
+            </option>
+
             {(workoutMap?.[workoutType] || []).map((name) => (
-              <option key={name} value={name}>{name}</option>
+              <option key={name} value={name}>
+                {name}
+              </option>
             ))}
           </select>
-        </label>
-
-        <div className="dashboard-summary dashboard-kpi-grid">
-          <div className="dashboard-kpi-card">
-            <div className="dashboard-kpi-card__label">Total workouts</div>
-            <div className="dashboard-kpi-card__value">{data?.totalWorkouts ?? 0}</div>
-          </div>
-          <div className="dashboard-kpi-card">
-            <div className="dashboard-kpi-card__label">Latest workout</div>
-            <div className="dashboard-kpi-card__value">{data?.latestWorkout?.workoutName || '—'}</div>
-          </div>
-          <div className="dashboard-kpi-card">
-            <div className="dashboard-kpi-card__label">Focus type</div>
-            <div className="dashboard-kpi-card__value">{workoutType || 'All'}</div>
-          </div>
-          <div className="dashboard-kpi-card">
-            <div className="dashboard-kpi-card__label">Focus name</div>
-            <div className="dashboard-kpi-card__value">{workoutName || 'All workouts'}</div>
-          </div>
         </div>
       </div>
 
@@ -149,7 +164,24 @@ export default function Dashboard() {
           accentVar={graph2AccentVar}
         />
       </div>
-
+      <div className="dashboard-summary dashboard-kpi-grid">
+        <div className="dashboard-kpi-card">
+          <div className="dashboard-kpi-card__label">Total workouts</div>
+          <div className="dashboard-kpi-card__value">{data?.totalWorkouts ?? 0}</div>
+        </div>
+        <div className="dashboard-kpi-card">
+          <div className="dashboard-kpi-card__label">Latest workout</div>
+          <div className="dashboard-kpi-card__value">{data?.latestWorkout?.workoutName || '—'}</div>
+        </div>
+        <div className="dashboard-kpi-card">
+          <div className="dashboard-kpi-card__label">Focus type</div>
+          <div className="dashboard-kpi-card__value">{workoutType || 'All'}</div>
+        </div>
+        <div className="dashboard-kpi-card">
+          <div className="dashboard-kpi-card__label">Focus name</div>
+          <div className="dashboard-kpi-card__value">{workoutName || 'All workouts'}</div>
+        </div>
+      </div>      
       {loading ? (
         <div style={{ padding: '8px 0', opacity: 0.8 }}>Loading dashboard…</div>
       ) : null}
@@ -164,12 +196,12 @@ export default function Dashboard() {
               <th>Name</th>
               {isCardio ? (
                 <>
-                  <th>Distance</th>
+                  <th>Distance ({distanceUnit})</th>
                   <th>Time</th>
                 </>
               ) : (
                 <>
-                  <th>Weight</th>
+                  <th>Weight ({weightUnit})</th>
                   <th>Sets</th>
                   <th>Reps</th>
                 </>
@@ -188,12 +220,12 @@ export default function Dashboard() {
                 <td>{w.workoutName}</td>
                 {isCardio ? (
                   <>
-                    <td>{w.distance ?? ''}</td>
+                    <td>{formatDisplayNumber(w.distance)}</td>
                     <td>{formatMinutesAsClock(w.time)}</td>
                   </>
                 ) : (
                   <>
-                    <td>{w.weight ?? ''}</td>
+                    <td>{formatDisplayNumber(w.weight)}</td>
                     <td>{w.sets ?? ''}</td>
                     <td>{w.reps ?? ''}</td>
                   </>

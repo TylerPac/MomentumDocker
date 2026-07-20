@@ -1,16 +1,19 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../api';
+import { useAuth } from '../auth';
+import '../styles/pages/EditWorkout.css';
 import { parsePartsToMinutes, splitMinutesToParts } from '../utils/duration';
 import { usePageMeta } from '../utils/pageMeta';
 import { useToast } from '../utils/toast';
+import { formatDisplayNumber, getUnitPreference } from '../utils/units';
 
 export default function EditWorkout() {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
-  const weightUnit = 'kg';
-  const distanceUnit = 'km';
+  const { user } = useAuth();
+  const { weightUnit, distanceUnit } = getUnitPreference(user?.unitSystem);
 
   usePageMeta({ title: 'Momentum — Edit Workout', description: 'Edit an existing workout.' });
 
@@ -42,7 +45,7 @@ export default function EditWorkout() {
         setWorkoutType(type);
         setWorkoutName(w.workoutName || '');
         setWorkoutDate(w.workoutDate || '');
-        setDistance(w.distance ?? '');
+        setDistance(formatDisplayNumber(w.distance));
         if (type === 'Cardio') {
           const parts = splitMinutesToParts(w.time);
           setTimeMinutes(parts.minutes);
@@ -51,7 +54,7 @@ export default function EditWorkout() {
           setTimeMinutes('');
           setTimeSeconds('');
         }
-        setWeight(w.weight ?? '');
+        setWeight(formatDisplayNumber(w.weight));
         setSets(w.sets ?? '');
         setReps(w.reps ?? '');
         setNotes(w.notes || '');

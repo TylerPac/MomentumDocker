@@ -1,5 +1,6 @@
 package dev.tylerpac.momentum.model;
 
+import dev.tylerpac.momentum.units.UnitSystem;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,7 +24,7 @@ public class Users {
     private String password;
 
     @Column(name = "unit_system", nullable = false)
-    private String unitSystem = "imperial";
+    private String unitSystem = UnitSystem.METRIC;
 
     public Users() {}
 

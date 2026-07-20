@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import HomeHeader from '../components/HomeHeader';
 import { useAuth } from '../auth';
-import '../styles/Home.css';
+import '../styles/pages/Home.css';
 
 export default function Home() {
   const { user } = useAuth();

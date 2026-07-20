@@ -20,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import dev.tylerpac.momentum.dto.settings.SettingsActionResponse;
 import dev.tylerpac.momentum.dto.settings.SettingsPasswordUpdateRequest;
+import dev.tylerpac.momentum.dto.settings.SettingsUnitSystemUpdateRequest;
 import dev.tylerpac.momentum.dto.settings.SettingsUsernameUpdateRequest;
 import dev.tylerpac.momentum.dto.common.UserDto;
 import dev.tylerpac.momentum.exception.ValidationException;
@@ -28,6 +29,7 @@ import dev.tylerpac.momentum.model.Users;
 import dev.tylerpac.momentum.repository.UsersRepository;
 import dev.tylerpac.momentum.repository.WorkoutRepository;
 import dev.tylerpac.momentum.security.JwtService;
+import dev.tylerpac.momentum.units.UnitSystem;
 import dev.tylerpac.momentum.validation.ValidationRules;
 
 @RestController
@@ -134,6 +136,28 @@ public class SettingsController {
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         Users saved = usersRepository.save(user);
         return new SettingsActionResponse(true, "Password updated", null, userDtoMapper.toDto(saved), null);
+    }
+
+    @PostMapping("/preferences/unit-system")
+    public SettingsActionResponse updateUnitSystem(@RequestBody SettingsUnitSystemUpdateRequest req, Authentication authentication) {
+        Users user = requireUser(authentication);
+
+        String unitSystem = req != null ? UnitSystem.normalize(req.unitSystem()) : "";
+        if (!UnitSystem.isSupported(unitSystem)) {
+            throw new ValidationException(
+                    HttpStatus.BAD_REQUEST,
+                    "Please choose metric or imperial",
+                    Map.of("unitSystem", "Must be metric or imperial")
+            );
+        }
+
+        if (unitSystem.equals(user.getUnitSystem())) {
+            return new SettingsActionResponse(true, "Units unchanged", null, userDtoMapper.toDto(user), null);
+        }
+
+        user.setUnitSystem(unitSystem);
+        Users saved = usersRepository.save(user);
+        return new SettingsActionResponse(true, "Units updated", null, userDtoMapper.toDto(saved), null);
     }
 
     @DeleteMapping("/account")

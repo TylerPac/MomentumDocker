@@ -8,6 +8,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import '../styles/components/LineChart.css';
 
 function toNumber(value) {
   return Number.isFinite(value) ? value : 0;
@@ -95,6 +96,20 @@ function ChartTooltip({ active, payload, label }) {
 }
 
 export default function LineChart({ title, labels, values, yLabel, yAxisLabel, yTickMin, yTickStep, accentVar = '--color-accent' }) {
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 820px)');
+
+    function updateIsMobile(event) {
+      setIsMobile(event.matches);
+    }
+
+    setIsMobile(mediaQuery.matches);
+    mediaQuery.addEventListener('change', updateIsMobile);
+    return () => mediaQuery.removeEventListener('change', updateIsMobile);
+  }, []);
+
   const chartData = React.useMemo(() => {
     return (labels || []).map((label, i) => ({
       label: String(label || ''),
@@ -119,7 +134,7 @@ export default function LineChart({ title, labels, values, yLabel, yAxisLabel, y
       ) : (
         <div className="chart-wrap chart-wrap--recharts">
           <ResponsiveContainer width="100%" height={240}>
-            <AreaChart data={chartData} margin={{ top: 16, right: 20, bottom: 20, left: 16 }}>
+            <AreaChart data={chartData} margin={{ top: 16, right: 20, bottom: 22, left: isMobile ? 10 : 28 }}>
               <defs>
                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={accentColor} stopOpacity={0.35} />
@@ -142,8 +157,8 @@ export default function LineChart({ title, labels, values, yLabel, yAxisLabel, y
                 tick={{ fill: 'var(--color-placeholder)', fontSize: 11, fontWeight: 700 }}
                 axisLine={{ stroke: 'var(--color-border)' }}
                 tickLine={{ stroke: 'var(--color-border)' }}
-                width={52}
-                label={{
+                width={isMobile ? 46 : 68}
+                label={isMobile ? undefined : {
                   value: yAxisLabel ?? yLabel,
                   angle: -90,
                   position: 'insideLeft',

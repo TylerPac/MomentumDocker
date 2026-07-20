@@ -27,13 +27,14 @@ import dev.tylerpac.momentum.mapper.UserDtoMapper;
 import dev.tylerpac.momentum.model.Users;
 import dev.tylerpac.momentum.repository.UsersRepository;
 import dev.tylerpac.momentum.security.JwtService;
+import dev.tylerpac.momentum.units.UnitSystem;
 import dev.tylerpac.momentum.validation.ValidationRules;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private static final String DEFAULT_UNIT_SYSTEM = "imperial";
+    private static final String DEFAULT_UNIT_SYSTEM = UnitSystem.METRIC;
 
     private final UsersRepository usersRepository;
     private final AuthenticationManager authenticationManager;

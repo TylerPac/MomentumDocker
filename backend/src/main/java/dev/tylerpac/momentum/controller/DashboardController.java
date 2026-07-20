@@ -23,6 +23,7 @@ import dev.tylerpac.momentum.model.Users;
 import dev.tylerpac.momentum.model.Workout;
 import dev.tylerpac.momentum.repository.UsersRepository;
 import dev.tylerpac.momentum.repository.WorkoutRepository;
+import dev.tylerpac.momentum.units.UnitSystem;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -49,7 +50,7 @@ public class DashboardController {
         long totalWorkouts = workoutRepository.countByUser(user);
 
         Workout latestWorkoutEntity = workoutRepository.findFirstByUserOrderByWorkoutDateDesc(user).orElse(null);
-        WorkoutDto latestWorkout = latestWorkoutEntity != null ? toDto(latestWorkoutEntity) : null;
+        WorkoutDto latestWorkout = latestWorkoutEntity != null ? toDto(latestWorkoutEntity, user) : null;
 
         String resolvedType = workoutType;
         String resolvedName = workoutName;
@@ -83,7 +84,7 @@ public class DashboardController {
         List<Float> graph2Values = new ArrayList<>();
 
         for (Workout w : relevantWorkouts) {
-            workoutDetails.add(toDto(w));
+            workoutDetails.add(toDto(w, user));
             if (w.getWorkoutDate() != null) {
                 sortedDates.add(w.getWorkoutDate().toString());
             }
@@ -91,21 +92,26 @@ public class DashboardController {
             if ("Cardio".equals(resolvedType)
                     && w.getDistance() != null && w.getTime() != null
                     && w.getDistance() > 0) {
-                float pace = w.getTime() / w.getDistance();
+                Float displayDistance = UnitSystem.distanceFromCanonical(w.getDistance(), user.getUnitSystem());
+                if (displayDistance == null || displayDistance <= 0) {
+                    continue;
+                }
+                float pace = w.getTime() / displayDistance;
                 graph1Values.add(pace);
-                graph2Values.add(w.getDistance());
+                graph2Values.add(displayDistance);
             } else if ("Weightlifting".equals(resolvedType)
                     && w.getReps() != null) {
+                Float displayWeight = UnitSystem.weightFromCanonical(w.getWeight(), user.getUnitSystem());
                 if (w.getWeight() != null) {
-                    graph1Values.add(w.getWeight());
+                    graph1Values.add(displayWeight);
                 }
 
                 Integer setsBoxed = w.getSets();
                 int sets = setsBoxed != null ? setsBoxed : 1;
                 int reps = w.getReps();
                 float totalReps = Math.max(0, sets) * Math.max(0, reps);
-                if (w.getWeight() != null) {
-                    graph2Values.add(w.getWeight() * totalReps);
+                if (displayWeight != null) {
+                    graph2Values.add(displayWeight * totalReps);
                 } else {
                     graph2Values.add(totalReps);
                 }
@@ -163,16 +169,16 @@ public class DashboardController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not signed in"));
     }
 
-    private static WorkoutDto toDto(Workout w) {
+    private static WorkoutDto toDto(Workout w, Users user) {
         String date = w.getWorkoutDate() != null ? w.getWorkoutDate().toString() : null;
         return new WorkoutDto(
                 w.getWorkoutId(),
                 w.getWorkoutType(),
                 w.getWorkoutName(),
                 date,
-                w.getDistance(),
+                UnitSystem.distanceFromCanonical(w.getDistance(), user.getUnitSystem()),
                 w.getTime(),
-                w.getWeight(),
+                UnitSystem.weightFromCanonical(w.getWeight(), user.getUnitSystem()),
                 w.getSets(),
                 w.getReps(),
                 w.getNotes()

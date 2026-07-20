@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { apiFetch, setAccessToken } from '../api';
 import { useAuth } from '../auth';
 import { usePageMeta } from '../utils/pageMeta';
+import '../styles/pages/SignIn.css';
 
 function passwordChecklist(password) {
   const value = password || '';
