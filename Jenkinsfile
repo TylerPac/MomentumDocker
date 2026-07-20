@@ -6,11 +6,26 @@ pipeline {
             steps {
                 echo "Building and testing Momentum branch: ${env.BRANCH_NAME}"
 
-                // Build images for every branch to verify Docker build health.
-                sh 'docker compose build --pull'
+                withCredentials([
+                    string(credentialsId: 'MOMENTUM_DB_NAME', variable: 'MOMENTUM_DB_NAME'),
+                    string(credentialsId: 'MOMENTUM_DB_USER', variable: 'MOMENTUM_DB_USER'),
+                    string(credentialsId: 'MOMENTUM_DB_PASSWORD', variable: 'MOMENTUM_DB_PASSWORD'),
+                    string(credentialsId: 'MOMENTUM_JWT_SECRET', variable: 'MOMENTUM_JWT_SECRET')
+                ]) {
+                    sh 'docker compose build --pull'
+                }
 
-                // Run backend tests in a Maven container so feature branches validate code.
-                sh 'docker run --rm -v "$PWD/backend:/app" -w /app maven:3.9-eclipse-temurin-21 mvn -q test'
+                sh '''
+                    echo "Checking backend from Jenkins:"
+                    ls -la "$PWD/backend"
+                    test -f "$PWD/backend/pom.xml"
+
+                    docker run --rm \
+                        --volumes-from "$HOSTNAME" \
+                        -w "$PWD/backend" \
+                        maven:3.9-eclipse-temurin-21 \
+                        mvn -q test
+                '''
             }
         }
 
